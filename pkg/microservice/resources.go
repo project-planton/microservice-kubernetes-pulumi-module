@@ -4,6 +4,7 @@ import (
 	"github.com/pkg/errors"
 	microservicecontextstate "github.com/plantoncloud/microservice-kubernetes-pulumi-blueprint/pkg/microservice/contextstate"
 	"github.com/plantoncloud/microservice-kubernetes-pulumi-blueprint/pkg/microservice/externalsecret"
+	"github.com/plantoncloud/microservice-kubernetes-pulumi-blueprint/pkg/microservice/gsa"
 	"github.com/plantoncloud/microservice-kubernetes-pulumi-blueprint/pkg/microservice/ingress"
 	"github.com/plantoncloud/microservice-kubernetes-pulumi-blueprint/pkg/microservice/ksa"
 	microservicenamespace "github.com/plantoncloud/microservice-kubernetes-pulumi-blueprint/pkg/microservice/namespace"
@@ -34,6 +35,12 @@ func (resourceStack *ResourceStack) Resources(ctx *pulumi.Context) error {
 	ctx, err = microservicenamespace.Resources(ctx)
 	if err != nil {
 		return errors.Wrap(err, "failed to create namespace resource")
+	}
+
+	// Create the gcp service account id resource
+	ctx, err = gsa.Resources(ctx)
+	if err != nil {
+		return errors.Wrap(err, "failed to create gcp service account id")
 	}
 
 	if err := secret.Resources(ctx); err != nil {
