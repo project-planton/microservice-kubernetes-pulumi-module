@@ -5,6 +5,7 @@ import (
 	gcpresourceprojectv1 "github.com/plantoncloud/planton-cloud-apis/zzgo/cloud/planton/apis/code2cloud/v1/cloudaccount/model/provider/gcp"
 	pulumigcp "github.com/pulumi/pulumi-gcp/sdk/v7/go/gcp"
 	kubernetescorev1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/core/v1"
+	"github.com/pulumi/pulumi-random/sdk/v4/go/random"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
@@ -16,7 +17,7 @@ type input struct {
 	namespace                    *kubernetescorev1.Namespace
 	labels                       map[string]string
 	containerClusterProject      *gcpresourceprojectv1.GcpProject
-	workloadIdentityGsaAccountId string
+	workloadIdentityGsaAccountId *random.RandomId
 }
 
 func extractInput(ctx *pulumi.Context) *input {
@@ -30,6 +31,6 @@ func extractInput(ctx *pulumi.Context) *input {
 		namespace:                    contextState.Status.AddedResources.Namespace,
 		labels:                       contextState.Spec.Labels,
 		containerClusterProject:      contextState.Spec.ContainerClusterProject,
-		workloadIdentityGsaAccountId: contextState.Spec.WorkloadIdentityGsaAccountId,
+		workloadIdentityGsaAccountId: contextState.Status.AddedResources.WorkLoadIdentityGsaAccountId,
 	}
 }

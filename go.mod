@@ -66,6 +66,7 @@ require (
 	github.com/plantoncloud/pulumi-stack-runner-go-sdk v0.0.47
 	github.com/pulumi/pulumi-gcp/sdk/v7 v7.29.0
 	github.com/pulumi/pulumi-kubernetes/sdk/v4 v4.7.1
+	github.com/pulumi/pulumi-random/sdk/v4 v4.14.0
 	istio.io/client-go v1.19.3
 )
 
