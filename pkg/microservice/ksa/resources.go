@@ -2,7 +2,6 @@ package ksa
 
 import (
 	"github.com/pkg/errors"
-	"github.com/plantoncloud-inc/go-commons/cloud/gcp/iam/serviceaccount"
 	"github.com/plantoncloud-inc/go-commons/cloud/gcp/iam/workloadidentity"
 	pulk8scv1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/core/v1"
 	v12 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/meta/v1"
@@ -22,26 +21,16 @@ func addKsa(ctx *pulumi.Context) error {
 		ApiVersion: pulumi.String("v1"),
 		Kind:       pulumi.String("ServiceAccount"),
 		Metadata: v12.ObjectMetaPtrInput(&v12.ObjectMetaArgs{
-			Name:        pulumi.String(i.namespaceName),
-			Namespace:   i.namespace.Metadata.Name(),
-			Annotations: getWorkloadIdentityAnnotations(i),
+			Name:      pulumi.String(i.namespaceName),
+			Namespace: i.namespace.Metadata.Name(),
+			Annotations: pulumi.StringMap{
+				workloadidentity.WorkloadIdentityKubeAnnotationKey: pulumi.Sprintf("%s@%s.iam.gserviceaccount.com",
+					pulumi.String(i.containerClusterProject.Id), i.workloadIdentityGsaAccountId.ID()),
+			},
 		}),
 	}, pulumi.Parent(i.namespace))
 	if err != nil {
 		return errors.Wrap(err, "failed to add service account")
 	}
 	return nil
-}
-
-// getWorkloadIdentityAnnotations generates annotations for workload identity
-func getWorkloadIdentityAnnotations(i *input) pulumi.StringMapOutput {
-	return pulumi.All(pulumi.String(i.containerClusterProject.Id).ToStringOutput(), i.workloadIdentityGsaAccountId).ApplyT(func(args []interface{}) map[string]string {
-		projectId := args[0].(string)
-		gsaAccountId := args[1].(string)
-		if !i.isWorkloadIdentityEnabled {
-			return map[string]string{}
-		}
-		gsaEmail := serviceaccount.GetEmail(projectId, gsaAccountId)
-		return map[string]string{workloadidentity.WorkloadIdentityKubeAnnotationKey: gsaEmail}
-	}).(pulumi.StringMapOutput)
 }
