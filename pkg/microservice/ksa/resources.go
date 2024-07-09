@@ -22,7 +22,7 @@ func addKsa(ctx *pulumi.Context) error {
 		ApiVersion: pulumi.String("v1"),
 		Kind:       pulumi.String("ServiceAccount"),
 		Metadata: v12.ObjectMetaPtrInput(&v12.ObjectMetaArgs{
-			Name:        pulumi.String(i.namespaceName),
+			Name:        pulumi.String(i.resourceName),
 			Namespace:   i.namespace.Metadata.Name(),
 			Annotations: getWorkloadIdentityAnnotations(i),
 		}),

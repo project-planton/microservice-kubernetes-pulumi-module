@@ -11,6 +11,7 @@ type input struct {
 	namespaceName                string
 	labels                       map[string]string
 	namespace                    *kubernetescorev1.Namespace
+	resourceName                 string
 	isWorkloadIdentityEnabled    bool
 	containerClusterProject      *gcpresourceprojectv1.GcpProject
 	workloadIdentityGsaAccountId string
@@ -23,6 +24,7 @@ func extractInput(ctx *pulumi.Context) *input {
 		isWorkloadIdentityEnabled:    contextState.Spec.IsWorkloadIdentityEnabled,
 		namespaceName:                contextState.Spec.NamespaceName,
 		namespace:                    contextState.Status.AddedResources.Namespace,
+		resourceName:                 contextState.Spec.ResourceName,
 		labels:                       contextState.Spec.Labels,
 		containerClusterProject:      contextState.Spec.ContainerClusterProject,
 		workloadIdentityGsaAccountId: contextState.Spec.WorkloadIdentityGsaAccountId,
