@@ -23,12 +23,13 @@ func extractInput(ctx *pulumi.Context) *input {
 	var contextState = ctx.Value(microservicecontextstate.Key).(microservicecontextstate.ContextState)
 
 	return &input{
-		microserviceKubernetesId:  contextState.Spec.ResourceId,
-		gcpProvider:               contextState.Spec.GcpProvider,
-		isWorkloadIdentityEnabled: contextState.Spec.IsWorkloadIdentityEnabled,
-		namespaceName:             contextState.Spec.NamespaceName,
-		namespace:                 contextState.Status.AddedResources.Namespace,
-		labels:                    contextState.Spec.Labels,
-		containerClusterProject:   contextState.Spec.ContainerClusterProject,
+		microserviceKubernetesId:     contextState.Spec.ResourceId,
+		gcpProvider:                  contextState.Spec.GcpProvider,
+		isWorkloadIdentityEnabled:    contextState.Spec.IsWorkloadIdentityEnabled,
+		namespaceName:                contextState.Spec.NamespaceName,
+		namespace:                    contextState.Status.AddedResources.Namespace,
+		labels:                       contextState.Spec.Labels,
+		containerClusterProject:      contextState.Spec.ContainerClusterProject,
+		workloadIdentityGsaAccountId: contextState.Spec.WorkloadIdentityGsaAccountId,
 	}
 }
