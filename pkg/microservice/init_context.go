@@ -1,7 +1,6 @@
 package microservice
 
 import (
-	"fmt"
 	"github.com/pkg/errors"
 	environmentblueprinthostnames "github.com/plantoncloud/environment-pulumi-blueprint/pkg/gcpgke/endpointdomains/hostnames"
 	microservicecontextstate "github.com/plantoncloud/microservice-kubernetes-pulumi-blueprint/pkg/microservice/contextstate"
@@ -11,7 +10,6 @@ import (
 	"github.com/plantoncloud/pulumi-blueprint-golang-commons/pkg/google/pulumigoogleprovider"
 	"github.com/plantoncloud/pulumi-blueprint-golang-commons/pkg/kubernetes/pulumikubernetesprovider"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
-	"strings"
 )
 
 func loadConfig(ctx *pulumi.Context, resourceStack *ResourceStack) (*microservicecontextstate.ContextState, error) {
@@ -79,7 +77,6 @@ func loadConfig(ctx *pulumi.Context, resourceStack *ResourceStack) (*microservic
 			GcpProvider:                     gcpProvider,
 			ContainerClusterProject:         resourceStack.Input.ResourceInput.ContainerClusterProject,
 			IsWorkloadIdentityEnabled:       resourceStack.Input.ResourceInput.MicroserviceKubernetes.Spec.IsWorkloadIdentityEnabled,
-			WorkloadIdentityGsaAccountId:    getGsaAccountId(environmentInfo.EnvironmentId, resourceName),
 			PodManagerType:                  resourceStack.Input.ResourceInput.MicroserviceKubernetes.Spec.PodManagerType,
 			AppContainer:                    resourceStack.Input.ResourceInput.MicroserviceKubernetes.Spec.Container.App,
 			Version:                         resourceStack.Input.ResourceInput.MicroserviceKubernetes.Spec.Version,
@@ -90,17 +87,4 @@ func loadConfig(ctx *pulumi.Context, resourceStack *ResourceStack) (*microservic
 		},
 		Status: &microservicecontextstate.Status{},
 	}, nil
-}
-
-func getGsaAccountId(environmentId, microserviceKubernetesName string) string {
-	return fmt.Sprintf("%s-%s", removeCompanyId(environmentId), microserviceKubernetesName)
-}
-
-func removeCompanyId(environmentId string) string {
-	delimiter := "-"
-	parts := strings.Split(environmentId, delimiter)
-	if len(parts) > 1 {
-		return strings.Join(parts[1:], delimiter)
-	}
-	return environmentId
 }

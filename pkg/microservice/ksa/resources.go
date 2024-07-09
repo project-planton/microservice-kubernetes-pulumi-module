@@ -33,10 +33,15 @@ func addKsa(ctx *pulumi.Context) error {
 	return nil
 }
 
-func getWorkloadIdentityAnnotations(i *input) pulumi.StringMap {
-	if !i.isWorkloadIdentityEnabled {
-		return pulumi.ToStringMap(map[string]string{})
-	}
-	gsaEmail := serviceaccount.GetEmail(i.containerClusterProject.Id, i.workloadIdentityGsaAccountId)
-	return pulumi.StringMap{workloadidentity.WorkloadIdentityKubeAnnotationKey: pulumi.String(gsaEmail)}
+// getWorkloadIdentityAnnotations generates annotations for workload identity
+func getWorkloadIdentityAnnotations(i *input) pulumi.StringMapOutput {
+	return pulumi.All(pulumi.String(i.containerClusterProject.Id).ToStringOutput(), i.workloadIdentityGsaAccountId).ApplyT(func(args []interface{}) map[string]string {
+		projectId := args[0].(string)
+		gsaAccountId := args[1].(string)
+		if !i.isWorkloadIdentityEnabled {
+			return map[string]string{}
+		}
+		gsaEmail := serviceaccount.GetEmail(projectId, gsaAccountId)
+		return map[string]string{workloadidentity.WorkloadIdentityKubeAnnotationKey: gsaEmail}
+	}).(pulumi.StringMapOutput)
 }

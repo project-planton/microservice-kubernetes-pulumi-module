@@ -11,6 +11,7 @@ import (
 	pulumigcp "github.com/pulumi/pulumi-gcp/sdk/v7/go/gcp"
 	"github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes"
 	kubernetescorev1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/core/v1"
+	"github.com/pulumi/pulumi-random/sdk/v4/go/random"
 )
 
 const (
@@ -45,7 +46,7 @@ type Spec struct {
 	ContainerClusterProject         *gcpresourceprojectv1.GcpProject
 	GcpProvider                     *pulumigcp.Provider
 	IsWorkloadIdentityEnabled       bool
-	WorkloadIdentityGsaAccountId    string
+	WorkLoadIdentityGsaAccountId    string
 	PodManagerType                  podmanagertype.PodManagerType
 	AppContainer                    *microservicestatemodel.MicroserviceKubernetesSpecContainerSpecAppSpec
 	Version                         string
@@ -60,5 +61,6 @@ type Status struct {
 }
 
 type AddedResources struct {
-	Namespace *kubernetescorev1.Namespace
+	Namespace                    *kubernetescorev1.Namespace
+	WorkLoadIdentityGsaAccountId *random.RandomId
 }
