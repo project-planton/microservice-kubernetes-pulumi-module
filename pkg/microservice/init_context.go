@@ -86,6 +86,7 @@ func loadConfig(ctx *pulumi.Context, resourceStack *ResourceStack) (*microservic
 			EnvSpec:                         resourceStack.Input.ResourceInput.MicroserviceKubernetes.Spec.Container.App.Env,
 			AppPorts:                        resourceStack.Input.ResourceInput.MicroserviceKubernetes.Spec.Container.App.Ports,
 			Sidecars:                        resourceStack.Input.ResourceInput.MicroserviceKubernetes.Spec.Container.Sidecars,
+			AvailabilitySpec:                resourceStack.Input.ResourceInput.MicroserviceKubernetes.Spec.Availability,
 		},
 		Status: &microservicecontextstate.Status{},
 	}, nil
