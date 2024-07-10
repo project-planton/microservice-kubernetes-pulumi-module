@@ -31,6 +31,6 @@ func extractInput(ctx *pulumi.Context) *input {
 		namespace:                    contextState.Status.AddedResources.Namespace,
 		labels:                       contextState.Spec.Labels,
 		containerClusterProject:      contextState.Spec.ContainerClusterProject,
-		workloadIdentityGsaAccountId: contextState.Status.AddedResources.WorkLoadIdentityGsaAccountId,
+		workloadIdentityGsaAccountId: contextState.Status.AddedResources.WorkloadIdentityGsaAccountId,
 	}
 }

@@ -20,6 +20,7 @@ type input struct {
 	kubernetesImagePullSecretInputs []*microservicekubernetesstackmodel.KubernetesImagePullSecretInput
 	forwardServicePort              int32
 	listenerServicePort             int32
+	gsaEmailId                      pulumi.StringOutput
 }
 
 func extractInput(ctx *pulumi.Context) *input {
@@ -37,5 +38,8 @@ func extractInput(ctx *pulumi.Context) *input {
 		kubernetesImagePullSecretInputs: contextState.Spec.KubernetesImagePullSecretInputs,
 		forwardServicePort:              contextState.Spec.ForwardServicePort,
 		listenerServicePort:             contextState.Spec.ListenerServicePort,
+		gsaEmailId:                      contextState.Status.AddedResources.GsaEmailId,
+		internalHostname:                contextState.Spec.InternalHostname,
+		externalHostname:                contextState.Spec.ExternalHostname,
 	}
 }

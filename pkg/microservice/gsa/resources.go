@@ -9,8 +9,23 @@ import (
 
 func Resources(ctx *pulumi.Context) (*pulumi.Context, error) {
 	i := extractInput(ctx)
-	prefix := i.microserviceKubernetesName
+	if !i.isWorkloadIdentityEnabled {
+		return ctx, nil
+	}
+	gsaAccountId, err := generateGsaAccountId(ctx, i)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate gsa account id value: %w", err)
+	}
 
+	var contextState = ctx.Value(microservicecontextstate.Key).(microservicecontextstate.ContextState)
+
+	addWorkLoadIdentityGsaAccountIdToContext(&contextState, gsaAccountId, i.containerClusterProject.Id)
+	ctx = ctx.WithValue(microservicecontextstate.Key, contextState)
+	return ctx, nil
+}
+
+func generateGsaAccountId(ctx *pulumi.Context, i *input) (*random.RandomId, error) {
+	prefix := i.microserviceKubernetesName
 	if len(prefix) > 18 {
 		prefix = prefix[:18]
 	}
@@ -22,20 +37,20 @@ func Resources(ctx *pulumi.Context) (*pulumi.Context, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate gsa account id value: %w", err)
 	}
-
-	var contextState = ctx.Value(microservicecontextstate.Key).(microservicecontextstate.ContextState)
-
-	addWorkLoadIdentityGsaAccountIdToContext(&contextState, gsaAccountId)
-	ctx = ctx.WithValue(microservicecontextstate.Key, contextState)
-	return ctx, nil
+	return gsaAccountId, nil
 }
 
-func addWorkLoadIdentityGsaAccountIdToContext(existingConfig *microservicecontextstate.ContextState, workLoadIdentityGsaAccountId *random.RandomId) {
+func addWorkLoadIdentityGsaAccountIdToContext(existingConfig *microservicecontextstate.ContextState,
+	workLoadIdentityGsaAccountId *random.RandomId,
+	containerClusterProjectId string) {
+	var gsaEmailId = pulumi.Sprintf("%s@%s.iam.gserviceaccount.com", pulumi.String(containerClusterProjectId), workLoadIdentityGsaAccountId.Hex)
 	if existingConfig.Status.AddedResources == nil {
 		existingConfig.Status.AddedResources = &microservicecontextstate.AddedResources{
-			WorkLoadIdentityGsaAccountId: workLoadIdentityGsaAccountId,
+			GsaEmailId:                   gsaEmailId,
+			WorkloadIdentityGsaAccountId: workLoadIdentityGsaAccountId,
 		}
 		return
 	}
-	existingConfig.Status.AddedResources.WorkLoadIdentityGsaAccountId = workLoadIdentityGsaAccountId
+	existingConfig.Status.AddedResources.GsaEmailId = gsaEmailId
+	existingConfig.Status.AddedResources.WorkloadIdentityGsaAccountId = workLoadIdentityGsaAccountId
 }

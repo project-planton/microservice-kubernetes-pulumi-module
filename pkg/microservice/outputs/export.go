@@ -22,6 +22,7 @@ func Export(ctx *pulumi.Context) error {
 
 	ctx.Export(GetPortForwardCommandOutputName(), pulumi.String(kubePortForwardCommand))
 	ctx.Export(GetNamespaceNameOutputName(), pulumi.String(i.namespaceName))
+	ctx.Export(GetGsaEmailOutputName(i.namespaceName), i.gsaEmailId)
 
 	for _, imagePullSecretInput := range i.kubernetesImagePullSecretInputs {
 		ctx.Export(GetSecretNameOutputName(imagePullSecretInput.ImagePullSecretName), pulumi.String(imagePullSecretInput.ImagePullSecretName))

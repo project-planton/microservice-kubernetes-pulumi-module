@@ -21,16 +21,20 @@ func addKsa(ctx *pulumi.Context) error {
 		ApiVersion: pulumi.String("v1"),
 		Kind:       pulumi.String("ServiceAccount"),
 		Metadata: v12.ObjectMetaPtrInput(&v12.ObjectMetaArgs{
-			Name:      pulumi.String(i.namespaceName),
-			Namespace: i.namespace.Metadata.Name(),
-			Annotations: pulumi.StringMap{
-				workloadidentity.WorkloadIdentityKubeAnnotationKey: pulumi.Sprintf("%s@%s.iam.gserviceaccount.com",
-					pulumi.String(i.containerClusterProject.Id), i.workloadIdentityGsaAccountId.Hex),
-			},
+			Name:        pulumi.String(i.namespaceName),
+			Namespace:   i.namespace.Metadata.Name(),
+			Annotations: getWorkloadIdentityAnnotations(i.isWorkloadIdentityEnabled, i.gsaEmailId),
 		}),
 	}, pulumi.Parent(i.namespace))
 	if err != nil {
 		return errors.Wrap(err, "failed to add service account")
 	}
 	return nil
+}
+
+func getWorkloadIdentityAnnotations(isWorkloadIdentityEnabled bool, gsaEmailId pulumi.StringOutput) pulumi.StringMap {
+	if !isWorkloadIdentityEnabled {
+		return pulumi.ToStringMap(map[string]string{})
+	}
+	return pulumi.StringMap{workloadidentity.WorkloadIdentityKubeAnnotationKey: gsaEmailId}
 }

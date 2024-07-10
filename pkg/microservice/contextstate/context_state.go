@@ -12,6 +12,7 @@ import (
 	"github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes"
 	kubernetescorev1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/core/v1"
 	"github.com/pulumi/pulumi-random/sdk/v4/go/random"
+	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
 const (
@@ -62,5 +63,6 @@ type Status struct {
 
 type AddedResources struct {
 	Namespace                    *kubernetescorev1.Namespace
-	WorkLoadIdentityGsaAccountId *random.RandomId
+	GsaEmailId                   pulumi.StringOutput
+	WorkloadIdentityGsaAccountId *random.RandomId
 }
