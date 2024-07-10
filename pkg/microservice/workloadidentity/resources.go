@@ -29,7 +29,7 @@ func addGsa(ctx *pulumi.Context, i *input) (*serviceaccount.Account, error) {
 		&serviceaccount.AccountArgs{
 			Project:     pulumi.String(i.containerClusterProject.Id),
 			Description: pulumi.Sprintf("workload identity for %s", i.namespaceName),
-			AccountId:   i.workloadIdentityGsaAccountId.ID(),
+			AccountId:   i.workloadIdentityGsaAccountId.Hex,
 			DisplayName: pulumi.Sprintf("workload identity for %s kubernetes namespace", i.namespaceName),
 		}, pulumi.Provider(i.gcpProvider))
 	if err != nil {

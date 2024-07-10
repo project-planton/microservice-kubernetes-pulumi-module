@@ -25,7 +25,7 @@ func addKsa(ctx *pulumi.Context) error {
 			Namespace: i.namespace.Metadata.Name(),
 			Annotations: pulumi.StringMap{
 				workloadidentity.WorkloadIdentityKubeAnnotationKey: pulumi.Sprintf("%s@%s.iam.gserviceaccount.com",
-					pulumi.String(i.containerClusterProject.Id), i.workloadIdentityGsaAccountId.ID()),
+					pulumi.String(i.containerClusterProject.Id), i.workloadIdentityGsaAccountId.Hex),
 			},
 		}),
 	}, pulumi.Parent(i.namespace))

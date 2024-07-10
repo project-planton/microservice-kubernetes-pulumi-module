@@ -11,8 +11,8 @@ func Resources(ctx *pulumi.Context) (*pulumi.Context, error) {
 	i := extractInput(ctx)
 	prefix := i.microserviceKubernetesName
 
-	if len(prefix) > 20 {
-		prefix = prefix[:20]
+	if len(prefix) > 17 {
+		prefix = fmt.Sprintf("%s-", prefix[:17])
 	}
 
 	gsaAccountId, err := random.NewRandomId(ctx, "generate-gsa-account-id", &random.RandomIdArgs{
