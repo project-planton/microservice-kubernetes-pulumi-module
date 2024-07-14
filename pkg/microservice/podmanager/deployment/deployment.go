@@ -48,7 +48,11 @@ func addDeployment(ctx *pulumi.Context) error {
 			},
 		},
 	}, pulumi.Provider(i.kubernetesProvider), pulumi.IgnoreChanges([]string{
-		"status",
+		//WARNING: adding metdata.managedFields to ignoreChanges is rejected from kubernetes api-server for some reason
+		//although the issue must have been resolved by now,per, https://github.com/pulumi/pulumi-kubernetes/issues/1075,
+		//apparently it is not.
+		//error from the api-server is "metadata.managedFields must be nil"
+		//"metadata.managedFields", "status",
 	}))
 	if err != nil {
 		return errors.Wrap(err, "failed to add deployment")
