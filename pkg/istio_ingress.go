@@ -15,7 +15,7 @@ func istioIngress(ctx *pulumi.Context, locals *Locals, createdNamespace *kuberne
 	addedCertificate, err := certmanagerv1.NewCertificate(ctx, "ingress-certificate", &certmanagerv1.CertificateArgs{
 		Metadata: metav1.ObjectMetaArgs{
 			Name:      pulumi.String(locals.MicroserviceKubernetes.Metadata.Id),
-			Namespace: createdNamespace.Metadata.Name(),
+			Namespace: pulumi.String(vars.IstioIngressNamespace),
 			Labels:    pulumi.ToStringMap(labels),
 		},
 		Spec: certmanagerv1.CertificateSpecArgs{
