@@ -55,7 +55,7 @@ func (s *ResourceStack) Resources(ctx *pulumi.Context) error {
 
 	//create istio-ingress resources if ingress is enabled.
 	if locals.MicroserviceKubernetes.Spec.Ingress.IsEnabled {
-		if err := istioIngress(ctx, locals, createdNamespace, s.Labels); err != nil {
+		if err := istioIngress(ctx, locals, kubernetesProvider, createdNamespace, s.Labels); err != nil {
 			return errors.Wrap(err, "failed to create istio ingress resources")
 		}
 	}

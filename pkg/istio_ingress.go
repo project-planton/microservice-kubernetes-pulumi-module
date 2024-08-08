@@ -4,29 +4,33 @@ import (
 	"github.com/pkg/errors"
 	certmanagerv1 "github.com/plantoncloud/kubernetes-crd-pulumi-types/pkg/certmanager/certmanager/v1"
 	istiov1 "github.com/plantoncloud/kubernetes-crd-pulumi-types/pkg/istio/networking/v1"
+	"github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes"
 	kubernetescorev1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/core/v1"
 	metav1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/meta/v1"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	v1 "istio.io/api/networking/v1"
 )
 
-func istioIngress(ctx *pulumi.Context, locals *Locals, createdNamespace *kubernetescorev1.Namespace, labels map[string]string) error {
+func istioIngress(ctx *pulumi.Context, locals *Locals, kubernetesProvider *kubernetes.Provider,
+	createdNamespace *kubernetescorev1.Namespace, labels map[string]string) error {
 	//crate new certificate
-	addedCertificate, err := certmanagerv1.NewCertificate(ctx, "ingress-certificate", &certmanagerv1.CertificateArgs{
-		Metadata: metav1.ObjectMetaArgs{
-			Name:      pulumi.String(locals.MicroserviceKubernetes.Metadata.Id),
-			Namespace: pulumi.String(vars.IstioIngressNamespace),
-			Labels:    pulumi.ToStringMap(labels),
-		},
-		Spec: certmanagerv1.CertificateSpecArgs{
-			DnsNames:   pulumi.ToStringArray(locals.IngressHostnames),
-			SecretName: pulumi.String(locals.IngressCertSecretName),
-			IssuerRef: certmanagerv1.CertificateSpecIssuerRefArgs{
-				Kind: pulumi.String("ClusterIssuer"),
-				Name: pulumi.String(locals.IngressCertClusterIssuerName),
+	addedCertificate, err := certmanagerv1.NewCertificate(ctx,
+		"ingress-certificate",
+		&certmanagerv1.CertificateArgs{
+			Metadata: metav1.ObjectMetaArgs{
+				Name:      pulumi.String(locals.MicroserviceKubernetes.Metadata.Id),
+				Namespace: pulumi.String(vars.IstioIngressNamespace),
+				Labels:    pulumi.ToStringMap(labels),
 			},
-		},
-	})
+			Spec: certmanagerv1.CertificateSpecArgs{
+				DnsNames:   pulumi.ToStringArray(locals.IngressHostnames),
+				SecretName: pulumi.String(locals.IngressCertSecretName),
+				IssuerRef: certmanagerv1.CertificateSpecIssuerRefArgs{
+					Kind: pulumi.String("ClusterIssuer"),
+					Name: pulumi.String(locals.IngressCertClusterIssuerName),
+				},
+			},
+		}, pulumi.Provider(kubernetesProvider))
 	if err != nil {
 		return errors.Wrap(err, "error creating certificate")
 	}
@@ -70,7 +74,7 @@ func istioIngress(ctx *pulumi.Context, locals *Locals, createdNamespace *kuberne
 				},
 			},
 		},
-	})
+	}, pulumi.Provider(kubernetesProvider))
 	if err != nil {
 		return errors.Wrap(err, "error creating gateway")
 	}
@@ -110,8 +114,7 @@ func istioIngress(ctx *pulumi.Context, locals *Locals, createdNamespace *kuberne
 				},
 			},
 		},
-		Status: nil,
-	})
+	}, pulumi.Parent(createdNamespace))
 	if err != nil {
 		return errors.Wrap(err, "error creating virtual-service")
 	}
