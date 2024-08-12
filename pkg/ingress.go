@@ -34,19 +34,24 @@ func istioIngress(ctx *pulumi.Context, locals *Locals, kubernetesProvider *kuber
 		return errors.Wrap(err, "error creating certificate")
 	}
 
-	//create gateway
-	createdGateway, err := gatewayv1.NewGateway(ctx,
-		locals.MicroserviceKubernetes.Metadata.Id,
+	//create gateway for ingress from external(outside vpc) clients
+	createdExternalGateway, err := gatewayv1.NewGateway(ctx,
+		"external",
 		&gatewayv1.GatewayArgs{
 			Metadata: metav1.ObjectMetaArgs{
-				Name: pulumi.String(locals.MicroserviceKubernetes.Metadata.Id),
+				Name: pulumi.Sprintf("%s-external", locals.MicroserviceKubernetes.Metadata.Id),
 				//all gateway resources should be created in the istio-ingress deployment namespace
 				Namespace: pulumi.String(vars.IstioIngressNamespace),
 				Labels:    pulumi.ToStringMap(labels),
 			},
 			Spec: gatewayv1.GatewaySpecArgs{
-				//the selector labels map should match the desired istio-ingress deployment.
 				GatewayClassName: pulumi.String(vars.GatewayIngressClassName),
+				Addresses: pulumi.Array{
+					pulumi.Map{
+						"type":  pulumi.String("Hostname"),
+						"value": pulumi.String(vars.GatewayExternalLoadBalancerServiceHostname),
+					},
+				},
 				Listeners: gatewayv1.GatewaySpecListenersArray{
 					&gatewayv1.GatewaySpecListenersArgs{
 						Name:     pulumi.String("https-external"),
@@ -61,7 +66,49 @@ func istioIngress(ctx *pulumi.Context, locals *Locals, kubernetesProvider *kuber
 								},
 							},
 						},
+						AllowedRoutes: gatewayv1.GatewaySpecListenersAllowedRoutesArgs{
+							Namespaces: gatewayv1.GatewaySpecListenersAllowedRoutesNamespacesArgs{
+								From: pulumi.String("All"),
+							},
+						},
 					},
+					&gatewayv1.GatewaySpecListenersArgs{
+						Name:     pulumi.String("http-external"),
+						Hostname: pulumi.String(locals.IngressExternalHostname),
+						Port:     pulumi.Int(80),
+						Protocol: pulumi.String("HTTP"),
+						AllowedRoutes: gatewayv1.GatewaySpecListenersAllowedRoutesArgs{
+							Namespaces: gatewayv1.GatewaySpecListenersAllowedRoutesNamespacesArgs{
+								From: pulumi.String("All"),
+							},
+						},
+					},
+				},
+			},
+		}, pulumi.Provider(kubernetesProvider), pulumi.DependsOn([]pulumi.Resource{addedCertificate}))
+	if err != nil {
+		return errors.Wrap(err, "error creating gateway for ingress from external clients")
+	}
+
+	//create gateway for ingress from external(outside vpc) clients
+	createdInternalGateway, err := gatewayv1.NewGateway(ctx,
+		"internal",
+		&gatewayv1.GatewayArgs{
+			Metadata: metav1.ObjectMetaArgs{
+				Name: pulumi.Sprintf("%s-internal", locals.MicroserviceKubernetes.Metadata.Id),
+				//all gateway resources should be created in the istio-ingress deployment namespace
+				Namespace: pulumi.String(vars.IstioIngressNamespace),
+				Labels:    pulumi.ToStringMap(labels),
+			},
+			Spec: gatewayv1.GatewaySpecArgs{
+				GatewayClassName: pulumi.String(vars.GatewayIngressClassName),
+				Addresses: pulumi.Array{
+					pulumi.Map{
+						"type":  pulumi.String("Hostname"),
+						"value": pulumi.String(vars.GatewayInternalLoadBalancerServiceHostname),
+					},
+				},
+				Listeners: gatewayv1.GatewaySpecListenersArray{
 					&gatewayv1.GatewaySpecListenersArgs{
 						Name:     pulumi.String("https-internal"),
 						Hostname: pulumi.String(locals.IngressInternalHostname),
@@ -75,24 +122,28 @@ func istioIngress(ctx *pulumi.Context, locals *Locals, kubernetesProvider *kuber
 								},
 							},
 						},
-					},
-					&gatewayv1.GatewaySpecListenersArgs{
-						Name:     pulumi.String("http-external"),
-						Hostname: pulumi.String(locals.IngressExternalHostname),
-						Port:     pulumi.Int(80),
-						Protocol: pulumi.String("HTTP"),
+						AllowedRoutes: gatewayv1.GatewaySpecListenersAllowedRoutesArgs{
+							Namespaces: gatewayv1.GatewaySpecListenersAllowedRoutesNamespacesArgs{
+								From: pulumi.String("All"),
+							},
+						},
 					},
 					&gatewayv1.GatewaySpecListenersArgs{
 						Name:     pulumi.String("http-internal"),
 						Hostname: pulumi.String(locals.IngressInternalHostname),
 						Port:     pulumi.Int(80),
 						Protocol: pulumi.String("HTTP"),
+						AllowedRoutes: gatewayv1.GatewaySpecListenersAllowedRoutesArgs{
+							Namespaces: gatewayv1.GatewaySpecListenersAllowedRoutesNamespacesArgs{
+								From: pulumi.String("All"),
+							},
+						},
 					},
 				},
 			},
 		}, pulumi.Provider(kubernetesProvider), pulumi.DependsOn([]pulumi.Resource{addedCertificate}))
 	if err != nil {
-		return errors.Wrap(err, "error creating gateway")
+		return errors.Wrap(err, "error creating gateway for ingress from external clients")
 	}
 
 	var destinationServicePort = pulumi.Int(80)
@@ -102,21 +153,60 @@ func istioIngress(ctx *pulumi.Context, locals *Locals, kubernetesProvider *kuber
 		}
 	}
 
-	//create http-route
+	//create http-route for external-hostname
 	_, err = gatewayv1.NewHTTPRoute(ctx,
-		"main",
+		"external",
 		&gatewayv1.HTTPRouteArgs{
 			Metadata: metav1.ObjectMetaArgs{
-				Name:      pulumi.String(locals.MicroserviceKubernetes.Metadata.Id),
+				Name:      pulumi.String("external"),
 				Namespace: createdNamespace.Metadata.Name(),
 				Labels:    pulumi.ToStringMap(labels),
 			},
 			Spec: gatewayv1.HTTPRouteSpecArgs{
-				Hostnames: pulumi.ToStringArray(locals.IngressHostnames),
+				Hostnames: pulumi.StringArray{pulumi.String(locals.IngressExternalHostname)},
 				ParentRefs: gatewayv1.HTTPRouteSpecParentRefsArray{
 					gatewayv1.HTTPRouteSpecParentRefsArgs{
-						Name:      pulumi.String(locals.MicroserviceKubernetes.Metadata.Id),
-						Namespace: createdGateway.Metadata.Namespace(),
+						Name:      pulumi.Sprintf("%s-external", locals.MicroserviceKubernetes.Metadata.Id),
+						Namespace: createdExternalGateway.Metadata.Namespace(),
+					},
+				},
+				Rules: gatewayv1.HTTPRouteSpecRulesArray{
+					gatewayv1.HTTPRouteSpecRulesArgs{
+						Matches: gatewayv1.HTTPRouteSpecRulesMatchesArray{
+							gatewayv1.HTTPRouteSpecRulesMatchesArgs{
+								Path: gatewayv1.HTTPRouteSpecRulesMatchesPathArgs{
+									Type:  pulumi.String("PathPrefix"),
+									Value: pulumi.String("/"),
+								},
+							},
+						},
+						BackendRefs: gatewayv1.HTTPRouteSpecRulesBackendRefsArray{
+							gatewayv1.HTTPRouteSpecRulesBackendRefsArgs{
+								Name:      pulumi.String(locals.KubeServiceName),
+								Namespace: createdNamespace.Metadata.Name(),
+								Port:      destinationServicePort,
+							},
+						},
+					},
+				},
+			},
+		}, pulumi.Parent(createdNamespace))
+
+	//create http-route for internal-hostname
+	_, err = gatewayv1.NewHTTPRoute(ctx,
+		"internal",
+		&gatewayv1.HTTPRouteArgs{
+			Metadata: metav1.ObjectMetaArgs{
+				Name:      pulumi.String("internal"),
+				Namespace: createdNamespace.Metadata.Name(),
+				Labels:    pulumi.ToStringMap(labels),
+			},
+			Spec: gatewayv1.HTTPRouteSpecArgs{
+				Hostnames: pulumi.StringArray{pulumi.String(locals.IngressInternalHostname)},
+				ParentRefs: gatewayv1.HTTPRouteSpecParentRefsArray{
+					gatewayv1.HTTPRouteSpecParentRefsArgs{
+						Name:      pulumi.Sprintf("%s-internal", locals.MicroserviceKubernetes.Metadata.Id),
+						Namespace: createdInternalGateway.Metadata.Namespace(),
 					},
 				},
 				Rules: gatewayv1.HTTPRouteSpecRulesArray{
