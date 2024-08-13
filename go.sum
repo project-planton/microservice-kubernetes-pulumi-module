@@ -1,5 +1,6 @@
 buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.34.1-20240508200655-46a4cf4ba109.1 h1:LEXWFH/xZ5oOWrC3oOtHbUyBdzRWMCPpAQmKC9v05mA=
 buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.34.1-20240508200655-46a4cf4ba109.1/go.mod h1:XF+P8+RmfdufmIYpGUC+6bF7S+IlmHDEnCrO3OXaUAQ=
+buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.34.2-20240717164558-a6c49f84cc0f.2/go.mod h1:ylS4c28ACSI59oJrOdW4pHS4n0Hw4TgSPHn8rpHl4Yw=
 dario.cat/mergo v1.0.0 h1:AGCNq9Evsj31mOgNPcLyXc+4PNABt905YmuqPYYpBWk=
 dario.cat/mergo v1.0.0/go.mod h1:uNxQE+84aUszobStD9th8a29P2fMDhsBdgRYvZOxGmk=
 github.com/BurntSushi/toml v1.2.1 h1:9F2/+DoOYIOksmaJFPw1tGFy1eDnIJXg+UHjuD8lTak=
@@ -157,10 +158,16 @@ github.com/plantoncloud/kubernetes-crd-pulumi-types v0.0.0-20240811054507-35b723
 github.com/plantoncloud/kubernetes-crd-pulumi-types v0.0.0-20240811054507-35b7232001a0/go.mod h1:YLCJtAs51fM1K6QceMbbnydcrUDHExpVlD0x6TaF1V4=
 github.com/plantoncloud/planton-cloud-apis v0.1.0 h1:elmqza/tcxCJPnGyynFou7Jx3tIHASErxLLZV0W12CY=
 github.com/plantoncloud/planton-cloud-apis v0.1.0/go.mod h1:y1LFk2+lhkY1KKqQ/t1R+WXPEwraH1aKfhOxVjZIaOY=
+github.com/plantoncloud/planton-cloud-apis v0.1.6 h1:jGeh1Wqu5fjXTrZThcxiLtkFweojvYhfrcR5v+d9jXk=
+github.com/plantoncloud/planton-cloud-apis v0.1.6/go.mod h1:JoJXssdYzg2Tqb7pPL7o4fYo3D01vJH/oi4PILupjlY=
 github.com/plantoncloud/pulumi-module-golang-commons v0.0.0-20240808151947-30fe31a468ca h1:QLvHP6rsJ1pqjoLP2vzHQoaBcZMLiUzXCKpAQ6m0Gis=
 github.com/plantoncloud/pulumi-module-golang-commons v0.0.0-20240808151947-30fe31a468ca/go.mod h1:RipLQS8aeSZuuEQZHqR3SoQE6/TJBlurft55rkb5hss=
+github.com/plantoncloud/pulumi-module-golang-commons v0.0.0-20240813091317-49da3b41a14f h1:jpMuzK/xxg2SwHMp5fBfX2QcXKqH7l8f539Qye/vMUc=
+github.com/plantoncloud/pulumi-module-golang-commons v0.0.0-20240813091317-49da3b41a14f/go.mod h1:Sr5reCDhYS+B+WkgydFWBaAR6tND/NMcDx8+l+7LAbo=
 github.com/plantoncloud/stack-job-runner-golang-sdk v0.0.56 h1:L60W/1GsQdnK35szFSE5KmcETob70MXFwy6G4NKCBf0=
 github.com/plantoncloud/stack-job-runner-golang-sdk v0.0.56/go.mod h1:TcL//M5c890ma4E8JLHdS3ZmMXH/J35PNSjIEH0qGsI=
+github.com/plantoncloud/stack-job-runner-golang-sdk v0.0.57 h1:DU0SuaGAsci/IrJc3tss6lDjXckenn09zlCy0ZTlvms=
+github.com/plantoncloud/stack-job-runner-golang-sdk v0.0.57/go.mod h1:2T4UfhOnO7eypHT3Umjerv36ACaUdwAS+HsfK4+LKy0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/pulumi/appdash v0.0.0-20231130102222-75f619a67231 h1:vkHw5I/plNdTr435cARxCW6q9gc0S/Yxz7Mkd38pOb0=

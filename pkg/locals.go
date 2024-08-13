@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/plantoncloud/microservice-kubernetes-pulumi-module/pkg/outputs"
-	microservicekubernetesmodel "github.com/plantoncloud/planton-cloud-apis/zzgo/cloud/planton/apis/code2cloud/v1/kubernetes/microservicekubernetes/model"
+	"github.com/plantoncloud/planton-cloud-apis/zzgo/cloud/planton/apis/code2cloud/v1/kubernetes/microservicekubernetes"
 	"github.com/plantoncloud/planton-cloud-apis/zzgo/cloud/planton/apis/connect/v1/kubernetesdockercredential/enums/dockerrepoprovider"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
@@ -20,11 +20,11 @@ type Locals struct {
 	KubeServiceFqdn              string
 	KubeServiceName              string
 	Namespace                    string
-	MicroserviceKubernetes       *microservicekubernetesmodel.MicroserviceKubernetes
+	MicroserviceKubernetes       *microservicekubernetes.MicroserviceKubernetes
 	ImagePullSecretData          map[string]string
 }
 
-func initializeLocals(ctx *pulumi.Context, stackInput *microservicekubernetesmodel.MicroserviceKubernetesStackInput) (*Locals, error) {
+func initializeLocals(ctx *pulumi.Context, stackInput *microservicekubernetes.MicroserviceKubernetesStackInput) (*Locals, error) {
 	locals := &Locals{}
 	//assign value for the locals variable to make it available across the project
 	locals.MicroserviceKubernetes = stackInput.ApiResource
