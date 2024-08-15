@@ -110,7 +110,7 @@ func istioIngress(ctx *pulumi.Context, locals *Locals, kubernetesProvider *kuber
 				},
 				Listeners: gatewayv1.GatewaySpecListenersArray{
 					&gatewayv1.GatewaySpecListenersArgs{
-						Name:     pulumi.String("https"),
+						Name:     pulumi.String("https-internal"),
 						Hostname: pulumi.String(locals.IngressInternalHostname),
 						Port:     pulumi.Int(443),
 						Protocol: pulumi.String("HTTPS"),
@@ -129,7 +129,7 @@ func istioIngress(ctx *pulumi.Context, locals *Locals, kubernetesProvider *kuber
 						},
 					},
 					&gatewayv1.GatewaySpecListenersArgs{
-						Name:     pulumi.String("http"),
+						Name:     pulumi.String("http-internal"),
 						Hostname: pulumi.String(locals.IngressInternalHostname),
 						Port:     pulumi.Int(80),
 						Protocol: pulumi.String("HTTP"),
@@ -155,10 +155,10 @@ func istioIngress(ctx *pulumi.Context, locals *Locals, kubernetesProvider *kuber
 
 	//create http-route for setting up https-redirect for external-hostname
 	_, err = gatewayv1.NewHTTPRoute(ctx,
-		"external-https-redirect",
+		"http-external-redirect",
 		&gatewayv1.HTTPRouteArgs{
 			Metadata: metav1.ObjectMetaArgs{
-				Name:      pulumi.String("external-https-redirect"),
+				Name:      pulumi.String("http-external-redirect"),
 				Namespace: createdNamespace.Metadata.Name(),
 				Labels:    pulumi.ToStringMap(labels),
 			},
@@ -168,7 +168,7 @@ func istioIngress(ctx *pulumi.Context, locals *Locals, kubernetesProvider *kuber
 					gatewayv1.HTTPRouteSpecParentRefsArgs{
 						Name:        pulumi.Sprintf("%s-external", locals.MicroserviceKubernetes.Metadata.Id),
 						Namespace:   createdExternalGateway.Metadata.Namespace(),
-						SectionName: pulumi.String("http"),
+						SectionName: pulumi.String("http-external"),
 					},
 				},
 				Rules: gatewayv1.HTTPRouteSpecRulesArray{
@@ -189,10 +189,10 @@ func istioIngress(ctx *pulumi.Context, locals *Locals, kubernetesProvider *kuber
 
 	//create http-route for external-hostname with https listener
 	_, err = gatewayv1.NewHTTPRoute(ctx,
-		"external-https",
+		"https-external",
 		&gatewayv1.HTTPRouteArgs{
 			Metadata: metav1.ObjectMetaArgs{
-				Name:      pulumi.String("external-https"),
+				Name:      pulumi.String("https-external"),
 				Namespace: createdNamespace.Metadata.Name(),
 				Labels:    pulumi.ToStringMap(labels),
 			},
@@ -202,7 +202,7 @@ func istioIngress(ctx *pulumi.Context, locals *Locals, kubernetesProvider *kuber
 					gatewayv1.HTTPRouteSpecParentRefsArgs{
 						Name:        pulumi.Sprintf("%s-external", locals.MicroserviceKubernetes.Metadata.Id),
 						Namespace:   createdExternalGateway.Metadata.Namespace(),
-						SectionName: pulumi.String("https"),
+						SectionName: pulumi.String("https-external"),
 					},
 				},
 				Rules: gatewayv1.HTTPRouteSpecRulesArray{
@@ -229,10 +229,10 @@ func istioIngress(ctx *pulumi.Context, locals *Locals, kubernetesProvider *kuber
 
 	//create http-route for setting up https-redirect for internal-hostname
 	_, err = gatewayv1.NewHTTPRoute(ctx,
-		"internal-https-redirect",
+		"http-internal-redirect",
 		&gatewayv1.HTTPRouteArgs{
 			Metadata: metav1.ObjectMetaArgs{
-				Name:      pulumi.String("internal-https-redirect"),
+				Name:      pulumi.String("http-internal-redirect"),
 				Namespace: createdNamespace.Metadata.Name(),
 				Labels:    pulumi.ToStringMap(labels),
 			},
@@ -242,7 +242,7 @@ func istioIngress(ctx *pulumi.Context, locals *Locals, kubernetesProvider *kuber
 					gatewayv1.HTTPRouteSpecParentRefsArgs{
 						Name:        pulumi.Sprintf("%s-internal", locals.MicroserviceKubernetes.Metadata.Id),
 						Namespace:   createdInternalGateway.Metadata.Namespace(),
-						SectionName: pulumi.String("http"),
+						SectionName: pulumi.String("http-external"),
 					},
 				},
 				Rules: gatewayv1.HTTPRouteSpecRulesArray{
@@ -263,10 +263,10 @@ func istioIngress(ctx *pulumi.Context, locals *Locals, kubernetesProvider *kuber
 
 	//create http-route for internal-hostname with https listener
 	_, err = gatewayv1.NewHTTPRoute(ctx,
-		"internal-https",
+		"https-internal",
 		&gatewayv1.HTTPRouteArgs{
 			Metadata: metav1.ObjectMetaArgs{
-				Name:      pulumi.String("internal"),
+				Name:      pulumi.String("https-internal"),
 				Namespace: createdNamespace.Metadata.Name(),
 				Labels:    pulumi.ToStringMap(labels),
 			},
@@ -276,7 +276,7 @@ func istioIngress(ctx *pulumi.Context, locals *Locals, kubernetesProvider *kuber
 					gatewayv1.HTTPRouteSpecParentRefsArgs{
 						Name:        pulumi.Sprintf("%s-internal", locals.MicroserviceKubernetes.Metadata.Id),
 						Namespace:   createdInternalGateway.Metadata.Namespace(),
-						SectionName: pulumi.String("https"),
+						SectionName: pulumi.String("https-internal"),
 					},
 				},
 				Rules: gatewayv1.HTTPRouteSpecRulesArray{
