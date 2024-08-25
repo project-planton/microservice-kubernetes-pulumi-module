@@ -7,6 +7,7 @@ var vars = struct {
 	IstioIngressNamespace                      string
 	MainPyConfigMapName                        string
 	LibFilesConfigMapName                      string
+	GcpSecretsManagerClusterSecretStoreName    string
 }{
 	GatewayIngressClassName:                    "istio",
 	GatewayInternalLoadBalancerServiceHostname: "ingress-internal.istio-ingress.svc.cluster.local",
@@ -14,4 +15,5 @@ var vars = struct {
 	IstioIngressNamespace:                      "istio-ingress",
 	MainPyConfigMapName:                        "main-py",
 	LibFilesConfigMapName:                      "lib-files",
+	GcpSecretsManagerClusterSecretStoreName:    "gcp-secrets-manager",
 }
