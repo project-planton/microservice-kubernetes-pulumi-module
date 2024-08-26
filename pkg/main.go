@@ -44,12 +44,13 @@ func (s *ResourceStack) Resources(ctx *pulumi.Context) error {
 	}
 
 	//create kubernetes deployment resources
-	if err := deployment(ctx, locals, createdNamespace, s.Labels); err != nil {
+	createdDeployment, err := deployment(ctx, locals, createdNamespace, s.Labels)
+	if err != nil {
 		return errors.Wrap(err, "failed to create microservice deployment")
 	}
 
 	//create kubernetes service resources
-	if err := service(ctx, locals, createdNamespace, s.Labels); err != nil {
+	if err := service(ctx, locals, createdNamespace, createdDeployment, s.Labels); err != nil {
 		return errors.Wrap(err, "failed to create microservice kubernetes service resource")
 	}
 
