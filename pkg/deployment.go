@@ -161,6 +161,6 @@ func deployment(ctx *pulumi.Context, locals *Locals, createdNamespace *kubernete
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to add deployment")
 	}
-	
+
 	return createdDeployment, nil
 }
