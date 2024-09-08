@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	externalsecretsv1beta1 "github.com/plantoncloud/kubernetes-crd-pulumi-types/pkg/externalsecrets/externalsecrets/v1beta1"
-	"github.com/plantoncloud/pulumi-module-golang-commons/pkg/datatypes/maps"
+	"github.com/plantoncloud/pulumi-module-golang-commons/pkg/datatypes/stringmaps/sortstringmap"
 	kubernetescorev1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/core/v1"
 	metav1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/meta/v1"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
@@ -19,7 +19,7 @@ func externalSecret(ctx *pulumi.Context, locals *Locals,
 
 	var secretData = externalsecretsv1beta1.ExternalSecretSpecDataArray{}
 
-	sortedSecretKeys := maps.SortMapKeys(secrets)
+	sortedSecretKeys := sortstringmap.SortMap(secrets)
 	for _, sortedSecretKey := range sortedSecretKeys {
 		secretData = append(secretData, externalsecretsv1beta1.ExternalSecretSpecDataArgs{
 			SecretKey: pulumi.String(sortedSecretKey),

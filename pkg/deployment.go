@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/plantoncloud/planton-cloud-apis/zzgo/cloud/planton/apis/commons/english/enums/englishword"
-	"github.com/plantoncloud/pulumi-module-golang-commons/pkg/datatypes/maps"
+	"github.com/plantoncloud/pulumi-module-golang-commons/pkg/datatypes/stringmaps/sortstringmap"
 	appsv1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/apps/v1"
 	kubernetescorev1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/core/v1"
 	metav1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/meta/v1"
@@ -59,7 +59,7 @@ func deployment(ctx *pulumi.Context, locals *Locals, createdNamespace *kubernete
 		},
 	}))
 
-	sortedEnvVariableKeys := maps.SortMapKeys(locals.MicroserviceKubernetes.Spec.Container.App.Env.Variables)
+	sortedEnvVariableKeys := sortstringmap.SortMap(locals.MicroserviceKubernetes.Spec.Container.App.Env.Variables)
 
 	for _, environmentVariableKey := range sortedEnvVariableKeys {
 		envVarInputs = append(envVarInputs, kubernetescorev1.EnvVarInput(kubernetescorev1.EnvVarArgs{
@@ -68,7 +68,7 @@ func deployment(ctx *pulumi.Context, locals *Locals, createdNamespace *kubernete
 		}))
 	}
 
-	sortedEnvironmentSecretKeys := maps.SortMapKeys(locals.MicroserviceKubernetes.Spec.Container.App.Env.Secrets)
+	sortedEnvironmentSecretKeys := sortstringmap.SortMap(locals.MicroserviceKubernetes.Spec.Container.App.Env.Secrets)
 
 	for _, environmentSecretKey := range sortedEnvironmentSecretKeys {
 		envVarInputs = append(envVarInputs, kubernetescorev1.EnvVarInput(kubernetescorev1.EnvVarArgs{
