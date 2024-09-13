@@ -6,8 +6,11 @@ import (
 	"github.com/pkg/errors"
 	"github.com/plantoncloud/microservice-kubernetes-pulumi-module/pkg/outputs"
 	"github.com/plantoncloud/planton-cloud-apis/zzgo/cloud/planton/apis/code2cloud/v1/kubernetes/microservicekubernetes"
-	"github.com/plantoncloud/planton-cloud-apis/zzgo/cloud/planton/apis/connect/v1/kubernetesdockercredential/enums/dockerrepoprovider"
+	"github.com/plantoncloud/planton-cloud-apis/zzgo/cloud/planton/apis/commons/apiresource/enums/apiresourcekind"
+	"github.com/plantoncloud/planton-cloud-apis/zzgo/cloud/planton/apis/connect/v1/dockercredential"
+	"github.com/plantoncloud/pulumi-module-golang-commons/pkg/provider/kubernetes/kuberneteslabelkeys"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
+	"strconv"
 )
 
 type Locals struct {
@@ -22,6 +25,7 @@ type Locals struct {
 	Namespace                    string
 	MicroserviceKubernetes       *microservicekubernetes.MicroserviceKubernetes
 	ImagePullSecretData          map[string]string
+	Labels                       map[string]string
 }
 
 func initializeLocals(ctx *pulumi.Context, stackInput *microservicekubernetes.MicroserviceKubernetesStackInput) (*Locals, error) {
@@ -29,9 +33,17 @@ func initializeLocals(ctx *pulumi.Context, stackInput *microservicekubernetes.Mi
 	//assign value for the locals variable to make it available across the project
 	locals.MicroserviceKubernetes = stackInput.ApiResource
 
-	if stackInput.KubernetesDockerCredential != nil &&
-		dockerrepoprovider.DockerRepoProvider_gcp_artifact_registry == stackInput.KubernetesDockerCredential.Spec.DockerRepoProvider {
-		decodedStringBytes, err := b64.StdEncoding.DecodeString(stackInput.KubernetesDockerCredential.Spec.GcpArtifactRegistryCredentialSpec.GcpServiceAccountKeyBase64)
+	locals.Labels = map[string]string{
+		kuberneteslabelkeys.Environment:  stackInput.ApiResource.Spec.EnvironmentInfo.EnvId,
+		kuberneteslabelkeys.Organization: stackInput.ApiResource.Spec.EnvironmentInfo.OrgId,
+		kuberneteslabelkeys.Resource:     strconv.FormatBool(true),
+		kuberneteslabelkeys.ResourceId:   stackInput.ApiResource.Metadata.Id,
+		kuberneteslabelkeys.ResourceKind: apiresourcekind.ApiResourceKind_microservice_kubernetes.String(),
+	}
+
+	if stackInput.DockerCredential != nil &&
+		dockercredential.DockerRepoProvider_gcp_artifact_registry == stackInput.DockerCredential.Spec.DockerRepoProvider {
+		decodedStringBytes, err := b64.StdEncoding.DecodeString(stackInput.DockerCredential.Spec.GcpArtifactRegistryCredentialSpec.GcpServiceAccountKeyBase64)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to decode gcp service account key base64")
 		}
@@ -46,7 +58,7 @@ func initializeLocals(ctx *pulumi.Context, stackInput *microservicekubernetes.Mi
 						"auth": "%s"
 					}
   				}
-			}`, stackInput.KubernetesDockerCredential.Spec.GcpArtifactRegistryCredentialSpec.DockerRepoHostname, dockerConfigAuth)}
+			}`, stackInput.DockerCredential.Spec.GcpArtifactRegistryCredentialSpec.DockerRepoHostname, dockerConfigAuth)}
 	}
 
 	microserviceKubernetes := stackInput.ApiResource

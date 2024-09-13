@@ -9,8 +9,7 @@ import (
 )
 
 func service(ctx *pulumi.Context, locals *Locals,
-	createdNamespace *kubernetescorev1.Namespace, createdDeployment *appsv1.Deployment,
-	labels map[string]string) error {
+	createdNamespace *kubernetescorev1.Namespace, createdDeployment *appsv1.Deployment) error {
 
 	portsArray := make(kubernetescorev1.ServicePortArray, 0)
 	for _, p := range locals.MicroserviceKubernetes.Spec.Container.App.Ports {
@@ -29,11 +28,11 @@ func service(ctx *pulumi.Context, locals *Locals,
 			Metadata: kubernetesmetav1.ObjectMetaArgs{
 				Name:      pulumi.String(locals.MicroserviceKubernetes.Spec.Version),
 				Namespace: createdNamespace.Metadata.Name(),
-				Labels:    pulumi.ToStringMap(labels),
+				Labels:    pulumi.ToStringMap(locals.Labels),
 			},
 			Spec: &kubernetescorev1.ServiceSpecArgs{
 				Type:     pulumi.String("ClusterIP"),
-				Selector: pulumi.ToStringMap(labels),
+				Selector: pulumi.ToStringMap(locals.Labels),
 				Ports:    portsArray,
 			},
 		}, pulumi.Parent(createdNamespace), pulumi.DependsOn([]pulumi.Resource{createdDeployment}))

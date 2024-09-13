@@ -10,19 +10,18 @@ import (
 )
 
 type ResourceStack struct {
-	Input  *microservicekubernetesmodel.MicroserviceKubernetesStackInput
-	Labels map[string]string
+	Input *microservicekubernetesmodel.MicroserviceKubernetesStackInput
 }
 
-func (s *ResourceStack) Resources(ctx *pulumi.Context) error {
-	locals, err := initializeLocals(ctx, s.Input)
+func Resources(ctx *pulumi.Context, stackInput *microservicekubernetesmodel.MicroserviceKubernetesStackInput) error {
+	locals, err := initializeLocals(ctx, stackInput)
 	if err != nil {
 		return errors.Wrap(err, "failed to initialize locals")
 	}
 
 	//create kubernetes-provider from the credential in the stack-input
 	kubernetesProvider, err := pulumikubernetesprovider.GetWithKubernetesClusterCredential(ctx,
-		s.Input.KubernetesClusterCredential, "kubernetes")
+		stackInput.KubernetesClusterCredential, "kubernetes")
 	if err != nil {
 		return errors.Wrap(err, "failed to create kubernetes provider")
 	}
@@ -34,7 +33,7 @@ func (s *ResourceStack) Resources(ctx *pulumi.Context) error {
 			Metadata: kubernetesmetav1.ObjectMetaPtrInput(
 				&kubernetesmetav1.ObjectMetaArgs{
 					Name:   pulumi.String(locals.Namespace),
-					Labels: pulumi.ToStringMap(s.Labels),
+					Labels: pulumi.ToStringMap(locals.Labels),
 				}),
 		},
 		pulumi.Timeouts(&pulumi.CustomTimeouts{Create: "5s", Update: "5s", Delete: "5s"}),
@@ -44,23 +43,23 @@ func (s *ResourceStack) Resources(ctx *pulumi.Context) error {
 	}
 
 	//create kubernetes deployment resources
-	createdDeployment, err := deployment(ctx, locals, createdNamespace, s.Labels)
+	createdDeployment, err := deployment(ctx, locals, createdNamespace)
 	if err != nil {
 		return errors.Wrap(err, "failed to create microservice deployment")
 	}
 
 	//create kubernetes service resources
-	if err := service(ctx, locals, createdNamespace, createdDeployment, s.Labels); err != nil {
+	if err := service(ctx, locals, createdNamespace, createdDeployment); err != nil {
 		return errors.Wrap(err, "failed to create microservice kubernetes service resource")
 	}
 
-	if err := externalSecret(ctx, locals, createdNamespace, s.Labels); err != nil {
+	if err := externalSecret(ctx, locals, createdNamespace); err != nil {
 		return errors.Wrap(err, "failed to create external secret")
 	}
 
 	//create istio-ingress resources if ingress is enabled.
 	if locals.MicroserviceKubernetes.Spec.Ingress.IsEnabled {
-		if err := istioIngress(ctx, locals, kubernetesProvider, createdNamespace, s.Labels); err != nil {
+		if err := ingress(ctx, locals, kubernetesProvider, createdNamespace); err != nil {
 			return errors.Wrap(err, "failed to create istio ingress resources")
 		}
 	}

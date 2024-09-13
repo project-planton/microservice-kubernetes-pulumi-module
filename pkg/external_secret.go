@@ -11,7 +11,7 @@ import (
 )
 
 func externalSecret(ctx *pulumi.Context, locals *Locals,
-	createdNamespace *kubernetescorev1.Namespace, labels map[string]string) error {
+	createdNamespace *kubernetescorev1.Namespace) error {
 	var secrets = locals.MicroserviceKubernetes.Spec.Container.App.Env.Secrets
 	if secrets == nil || len(secrets) == 0 {
 		return nil
@@ -36,7 +36,7 @@ func externalSecret(ctx *pulumi.Context, locals *Locals,
 			Metadata: &metav1.ObjectMetaArgs{
 				Name:      pulumi.String(locals.MicroserviceKubernetes.Spec.Version),
 				Namespace: createdNamespace.Metadata.Name(),
-				Labels:    pulumi.ToStringMap(labels),
+				Labels:    pulumi.ToStringMap(locals.Labels),
 			},
 			Spec: &externalsecretsv1beta1.ExternalSecretSpecArgs{
 				Data:            secretData,

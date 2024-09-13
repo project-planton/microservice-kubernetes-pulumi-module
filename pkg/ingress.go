@@ -10,8 +10,8 @@ import (
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
-func istioIngress(ctx *pulumi.Context, locals *Locals, kubernetesProvider *kubernetes.Provider,
-	createdNamespace *kubernetescorev1.Namespace, labels map[string]string) error {
+func ingress(ctx *pulumi.Context, locals *Locals, kubernetesProvider *kubernetes.Provider,
+	createdNamespace *kubernetescorev1.Namespace) error {
 	//crate new certificate
 	addedCertificate, err := certmanagerv1.NewCertificate(ctx,
 		"ingress-certificate",
@@ -19,7 +19,7 @@ func istioIngress(ctx *pulumi.Context, locals *Locals, kubernetesProvider *kuber
 			Metadata: metav1.ObjectMetaArgs{
 				Name:      pulumi.String(locals.MicroserviceKubernetes.Metadata.Id),
 				Namespace: pulumi.String(vars.IstioIngressNamespace),
-				Labels:    pulumi.ToStringMap(labels),
+				Labels:    pulumi.ToStringMap(locals.Labels),
 			},
 			Spec: certmanagerv1.CertificateSpecArgs{
 				DnsNames:   pulumi.ToStringArray(locals.IngressHostnames),
@@ -42,7 +42,7 @@ func istioIngress(ctx *pulumi.Context, locals *Locals, kubernetesProvider *kuber
 				Name: pulumi.Sprintf("%s-external", locals.MicroserviceKubernetes.Metadata.Id),
 				//all gateway resources should be created in the istio-ingress deployment namespace
 				Namespace: pulumi.String(vars.IstioIngressNamespace),
-				Labels:    pulumi.ToStringMap(labels),
+				Labels:    pulumi.ToStringMap(locals.Labels),
 			},
 			Spec: gatewayv1.GatewaySpecArgs{
 				GatewayClassName: pulumi.String(vars.GatewayIngressClassName),
@@ -98,7 +98,7 @@ func istioIngress(ctx *pulumi.Context, locals *Locals, kubernetesProvider *kuber
 				Name: pulumi.Sprintf("%s-internal", locals.MicroserviceKubernetes.Metadata.Id),
 				//all gateway resources should be created in the istio-ingress deployment namespace
 				Namespace: pulumi.String(vars.IstioIngressNamespace),
-				Labels:    pulumi.ToStringMap(labels),
+				Labels:    pulumi.ToStringMap(locals.Labels),
 			},
 			Spec: gatewayv1.GatewaySpecArgs{
 				GatewayClassName: pulumi.String(vars.GatewayIngressClassName),
@@ -160,7 +160,7 @@ func istioIngress(ctx *pulumi.Context, locals *Locals, kubernetesProvider *kuber
 			Metadata: metav1.ObjectMetaArgs{
 				Name:      pulumi.String("http-external-redirect"),
 				Namespace: createdNamespace.Metadata.Name(),
-				Labels:    pulumi.ToStringMap(labels),
+				Labels:    pulumi.ToStringMap(locals.Labels),
 			},
 			Spec: gatewayv1.HTTPRouteSpecArgs{
 				Hostnames: pulumi.StringArray{pulumi.String(locals.IngressExternalHostname)},
@@ -194,7 +194,7 @@ func istioIngress(ctx *pulumi.Context, locals *Locals, kubernetesProvider *kuber
 			Metadata: metav1.ObjectMetaArgs{
 				Name:      pulumi.String("https-external"),
 				Namespace: createdNamespace.Metadata.Name(),
-				Labels:    pulumi.ToStringMap(labels),
+				Labels:    pulumi.ToStringMap(locals.Labels),
 			},
 			Spec: gatewayv1.HTTPRouteSpecArgs{
 				Hostnames: pulumi.StringArray{pulumi.String(locals.IngressExternalHostname)},
@@ -234,7 +234,7 @@ func istioIngress(ctx *pulumi.Context, locals *Locals, kubernetesProvider *kuber
 			Metadata: metav1.ObjectMetaArgs{
 				Name:      pulumi.String("http-internal-redirect"),
 				Namespace: createdNamespace.Metadata.Name(),
-				Labels:    pulumi.ToStringMap(labels),
+				Labels:    pulumi.ToStringMap(locals.Labels),
 			},
 			Spec: gatewayv1.HTTPRouteSpecArgs{
 				Hostnames: pulumi.StringArray{pulumi.String(locals.IngressInternalHostname)},
@@ -268,7 +268,7 @@ func istioIngress(ctx *pulumi.Context, locals *Locals, kubernetesProvider *kuber
 			Metadata: metav1.ObjectMetaArgs{
 				Name:      pulumi.String("https-internal"),
 				Namespace: createdNamespace.Metadata.Name(),
-				Labels:    pulumi.ToStringMap(labels),
+				Labels:    pulumi.ToStringMap(locals.Labels),
 			},
 			Spec: gatewayv1.HTTPRouteSpecArgs{
 				Hostnames: pulumi.StringArray{pulumi.String(locals.IngressInternalHostname)},

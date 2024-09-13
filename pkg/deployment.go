@@ -11,14 +11,15 @@ import (
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
-func deployment(ctx *pulumi.Context, locals *Locals, createdNamespace *kubernetescorev1.Namespace, labels map[string]string) (*appsv1.Deployment, error) {
+func deployment(ctx *pulumi.Context, locals *Locals,
+	createdNamespace *kubernetescorev1.Namespace) (*appsv1.Deployment, error) {
 
 	// create image pull secret resources
-	_, err := kubernetescorev1.NewSecret(ctx, locals.MicroserviceKubernetes.Spec.KubernetesDockerCredentialId, &kubernetescorev1.SecretArgs{
+	_, err := kubernetescorev1.NewSecret(ctx, locals.MicroserviceKubernetes.Spec.DockerCredentialId, &kubernetescorev1.SecretArgs{
 		Metadata: &metav1.ObjectMetaArgs{
-			Name:      pulumi.String(locals.MicroserviceKubernetes.Spec.KubernetesDockerCredentialId),
+			Name:      pulumi.String(locals.MicroserviceKubernetes.Spec.DockerCredentialId),
 			Namespace: createdNamespace.Metadata.Name(),
-			Labels:    pulumi.ToStringMap(labels),
+			Labels:    pulumi.ToStringMap(locals.Labels),
 		},
 		Type:       pulumi.String("kubernetes.io/dockerconfigjson"),
 		StringData: pulumi.ToStringMap(locals.ImagePullSecretData),
@@ -126,7 +127,7 @@ func deployment(ctx *pulumi.Context, locals *Locals, createdNamespace *kubernete
 			Metadata: &metav1.ObjectMetaArgs{
 				Name:      pulumi.String(locals.MicroserviceKubernetes.Metadata.Name),
 				Namespace: createdNamespace.Metadata.Name(),
-				Labels:    pulumi.ToStringMap(labels),
+				Labels:    pulumi.ToStringMap(locals.Labels),
 				Annotations: pulumi.StringMap{
 					"pulumi.com/patchForce": pulumi.String("true"),
 				},
@@ -134,16 +135,16 @@ func deployment(ctx *pulumi.Context, locals *Locals, createdNamespace *kubernete
 			Spec: &appsv1.DeploymentSpecArgs{
 				Replicas: pulumi.Int(locals.MicroserviceKubernetes.Spec.Availability.MinReplicas),
 				Selector: &metav1.LabelSelectorArgs{
-					MatchLabels: pulumi.ToStringMap(labels),
+					MatchLabels: pulumi.ToStringMap(locals.Labels),
 				},
 				Template: &kubernetescorev1.PodTemplateSpecArgs{
 					Metadata: &metav1.ObjectMetaArgs{
-						Labels: pulumi.ToStringMap(labels),
+						Labels: pulumi.ToStringMap(locals.Labels),
 					},
 					Spec: &kubernetescorev1.PodSpecArgs{
 						ServiceAccountName: createdServiceAccount.Metadata.Name(),
 						ImagePullSecrets: kubernetescorev1.LocalObjectReferenceArray{kubernetescorev1.LocalObjectReferenceArgs{
-							Name: pulumi.String(locals.MicroserviceKubernetes.Spec.KubernetesDockerCredentialId),
+							Name: pulumi.String(locals.MicroserviceKubernetes.Spec.DockerCredentialId),
 						}},
 						Containers: kubernetescorev1.ContainerArray(containerInputs),
 						//wait for 60 seconds before sending the termination signal to the processes in the pod
