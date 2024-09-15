@@ -31,19 +31,19 @@ type Locals struct {
 func initializeLocals(ctx *pulumi.Context, stackInput *microservicekubernetes.MicroserviceKubernetesStackInput) (*Locals, error) {
 	locals := &Locals{}
 	//assign value for the locals variable to make it available across the project
-	locals.MicroserviceKubernetes = stackInput.ApiResource
+	locals.MicroserviceKubernetes = stackInput.Target
 
 	locals.Labels = map[string]string{
-		kuberneteslabelkeys.Environment:  stackInput.ApiResource.Spec.EnvironmentInfo.EnvId,
-		kuberneteslabelkeys.Organization: stackInput.ApiResource.Spec.EnvironmentInfo.OrgId,
+		kuberneteslabelkeys.Environment:  stackInput.Target.Spec.EnvironmentInfo.EnvId,
+		kuberneteslabelkeys.Organization: stackInput.Target.Spec.EnvironmentInfo.OrgId,
 		kuberneteslabelkeys.Resource:     strconv.FormatBool(true),
-		kuberneteslabelkeys.ResourceId:   stackInput.ApiResource.Metadata.Id,
+		kuberneteslabelkeys.ResourceId:   stackInput.Target.Metadata.Id,
 		kuberneteslabelkeys.ResourceKind: apiresourcekind.ApiResourceKind_microservice_kubernetes.String(),
 	}
 
 	if stackInput.DockerCredential != nil &&
-		dockercredential.DockerRepoProvider_gcp_artifact_registry == stackInput.DockerCredential.Spec.DockerRepoProvider {
-		decodedStringBytes, err := b64.StdEncoding.DecodeString(stackInput.DockerCredential.Spec.GcpArtifactRegistryCredentialSpec.GcpServiceAccountKeyBase64)
+		dockercredential.DockerRepoProvider_gcp_artifact_registry == stackInput.DockerCredential.DockerRepoProvider {
+		decodedStringBytes, err := b64.StdEncoding.DecodeString(stackInput.DockerCredential.GcpArtifactRegistryCredentialSpec.GcpServiceAccountKeyBase64)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to decode gcp service account key base64")
 		}
@@ -58,10 +58,10 @@ func initializeLocals(ctx *pulumi.Context, stackInput *microservicekubernetes.Mi
 						"auth": "%s"
 					}
   				}
-			}`, stackInput.DockerCredential.Spec.GcpArtifactRegistryCredentialSpec.DockerRepoHostname, dockerConfigAuth)}
+			}`, stackInput.DockerCredential.GcpArtifactRegistryCredentialSpec.DockerRepoHostname, dockerConfigAuth)}
 	}
 
-	microserviceKubernetes := stackInput.ApiResource
+	microserviceKubernetes := stackInput.Target
 
 	//decide on the namespace
 	locals.Namespace = microserviceKubernetes.Metadata.Id
