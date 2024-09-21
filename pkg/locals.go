@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/plantoncloud/microservice-kubernetes-pulumi-module/pkg/outputs"
-	"github.com/plantoncloud/planton-cloud-apis/zzgo/cloud/planton/apis/code2cloud/v1/kubernetes/microservicekubernetes"
-	"github.com/plantoncloud/planton-cloud-apis/zzgo/cloud/planton/apis/commons/apiresource/enums/apiresourcekind"
-	"github.com/plantoncloud/planton-cloud-apis/zzgo/cloud/planton/apis/connect/v1/dockercredential"
+	"github.com/plantoncloud/planton/apis/zzgo/cloud/planton/apis/code2cloud/v1/kubernetes/microservicekubernetes"
+	"github.com/plantoncloud/planton/apis/zzgo/cloud/planton/apis/commons/apiresource/enums/apiresourcekind"
+	"github.com/plantoncloud/planton/apis/zzgo/cloud/planton/apis/connect/v1/dockercredential"
 	"github.com/plantoncloud/pulumi-module-golang-commons/pkg/provider/kubernetes/kuberneteslabelkeys"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"strconv"
@@ -43,7 +43,7 @@ func initializeLocals(ctx *pulumi.Context, stackInput *microservicekubernetes.Mi
 
 	if stackInput.DockerCredential != nil &&
 		dockercredential.DockerRepoProvider_gcp_artifact_registry == stackInput.DockerCredential.DockerRepoProvider {
-		decodedStringBytes, err := b64.StdEncoding.DecodeString(stackInput.DockerCredential.GcpArtifactRegistryCredentialSpec.GcpServiceAccountKeyBase64)
+		decodedStringBytes, err := b64.StdEncoding.DecodeString(stackInput.DockerCredential.GcpArtifactRegistry.GcpServiceAccountKeyBase64)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to decode gcp service account key base64")
 		}
@@ -58,7 +58,7 @@ func initializeLocals(ctx *pulumi.Context, stackInput *microservicekubernetes.Mi
 						"auth": "%s"
 					}
   				}
-			}`, stackInput.DockerCredential.GcpArtifactRegistryCredentialSpec.DockerRepoHostname, dockerConfigAuth)}
+			}`, stackInput.DockerCredential.GcpArtifactRegistry.DockerRepoHostname, dockerConfigAuth)}
 	}
 
 	microserviceKubernetes := stackInput.Target
