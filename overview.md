@@ -1,13 +1,5 @@
 # Overview
 
-The Pulumi module provided is designed to automate the deployment of a microservice onto a Kubernetes cluster using
-Pulumi and Go. It reads the microservice specifications from a standardized API resource model, which includes details
-like the API version, kind, metadata, spec, and status. The module utilizes this structured input to create and
-configure the necessary Kubernetes resources that represent the desired state of the microservice deployment.
+The Pulumi module for the microservice Kubernetes deployment provides a streamlined and unified approach to managing Kubernetes resources through a standard API-based workflow. The module takes the `MicroserviceKubernetesStackInput` as input, which includes key configurations such as Kubernetes cluster credentials, Docker credentials, and the microservice specification. It uses these inputs to generate and manage Kubernetes resources like namespaces, deployments, services, and optionally ingress resources. The module interacts with Kubernetes using Pulumi’s Kubernetes provider, enabling efficient resource management and deployment. Furthermore, it ensures that outputs like internal and external endpoints, and commands for port forwarding, are captured in the `MicroserviceKubernetesStackOutputs`.
 
-Key functionalities of the module include setting up a Kubernetes namespace, creating image pull secrets based on
-provided Docker credentials, and deploying the microservice using a Kubernetes Deployment resource. It configures
-environment variables, secrets, ports, and resource limits as specified. The module also creates a Kubernetes Service to
-expose the microservice internally within the cluster. If ingress is enabled, it sets up ingress resources using the
-Gateway API and Cert-Manager to handle external and internal HTTPS traffic, including the provisioning of TLS
-certificates and defining routing rules for hostnames.
+What sets this module apart is its ability to dynamically create cloud resources based on the standardized API resource specification provided by the developer. It automates the Kubernetes resource creation process, encapsulates best practices, and integrates seamlessly with Istio ingress for advanced networking configurations when enabled. The Pulumi module is a powerful tool for developers who need to deploy microservices on Kubernetes, offering a simplified workflow with a focus on modularity and reusability.

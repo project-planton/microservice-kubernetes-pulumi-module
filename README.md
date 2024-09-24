@@ -1,15 +1,5 @@
 # Microservice Kubernetes Pulumi Module
 
-## Overview
-
-The **Microservice Kubernetes Pulumi Module** automates the deployment of microservices onto Kubernetes clusters using
-Pulumi and Go. It leverages a standardized API resource model, enabling developers to define complex infrastructure and
-microservices through a single YAML file.
-
-This module interprets the provided API resource specifications, creates the necessary Kubernetes resources, and manages
-the deployment lifecycle. It simplifies the process of deploying microservices by abstracting the complexities involved
-in configuring Kubernetes deployments, services, ingress resources, and more.
-
 ## Key Features
 
 - **Standardized API Resource Model**: Utilizes a unified structure for API resources, ensuring consistency across
