@@ -1,19 +1,15 @@
 package pkg
 
 import (
+	microservicekubernetesv1 "buf.build/gen/go/plantoncloud/project-planton/protocolbuffers/go/project/planton/apis/provider/kubernetes/microservicekubernetes/v1"
 	"github.com/pkg/errors"
-	microservicekubernetesmodel "github.com/plantoncloud/project-planton/apis/zzgo/cloud/planton/apis/code2cloud/v1/kubernetes/microservicekubernetes"
 	"github.com/plantoncloud/pulumi-module-golang-commons/pkg/provider/kubernetes/pulumikubernetesprovider"
 	kubernetescorev1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/core/v1"
 	kubernetesmetav1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/meta/v1"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
-type ResourceStack struct {
-	Input *microservicekubernetesmodel.MicroserviceKubernetesStackInput
-}
-
-func Resources(ctx *pulumi.Context, stackInput *microservicekubernetesmodel.MicroserviceKubernetesStackInput) error {
+func Resources(ctx *pulumi.Context, stackInput *microservicekubernetesv1.MicroserviceKubernetesStackInput) error {
 	locals, err := initializeLocals(ctx, stackInput)
 	if err != nil {
 		return errors.Wrap(err, "failed to initialize locals")

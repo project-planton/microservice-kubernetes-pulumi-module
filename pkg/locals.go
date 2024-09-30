@@ -1,13 +1,12 @@
 package pkg
 
 import (
+	dockercredentialv1 "buf.build/gen/go/plantoncloud/project-planton/protocolbuffers/go/project/planton/apis/credential/dockercredential/v1"
+	microservicekubernetesv1 "buf.build/gen/go/plantoncloud/project-planton/protocolbuffers/go/project/planton/apis/provider/kubernetes/microservicekubernetes/v1"
 	b64 "encoding/base64"
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/plantoncloud/microservice-kubernetes-pulumi-module/pkg/outputs"
-	"github.com/plantoncloud/project-planton/apis/zzgo/cloud/planton/apis/code2cloud/v1/kubernetes/microservicekubernetes"
-	"github.com/plantoncloud/project-planton/apis/zzgo/cloud/planton/apis/commons/apiresource/enums/apiresourcekind"
-	"github.com/plantoncloud/project-planton/apis/zzgo/cloud/planton/apis/connect/v1/dockercredential"
 	"github.com/plantoncloud/pulumi-module-golang-commons/pkg/provider/kubernetes/kuberneteslabelkeys"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"strconv"
@@ -23,12 +22,12 @@ type Locals struct {
 	KubeServiceFqdn              string
 	KubeServiceName              string
 	Namespace                    string
-	MicroserviceKubernetes       *microservicekubernetes.MicroserviceKubernetes
+	MicroserviceKubernetes       *microservicekubernetesv1.MicroserviceKubernetes
 	ImagePullSecretData          map[string]string
 	Labels                       map[string]string
 }
 
-func initializeLocals(ctx *pulumi.Context, stackInput *microservicekubernetes.MicroserviceKubernetesStackInput) (*Locals, error) {
+func initializeLocals(ctx *pulumi.Context, stackInput *microservicekubernetesv1.MicroserviceKubernetesStackInput) (*Locals, error) {
 	locals := &Locals{}
 	//assign value for the locals variable to make it available across the project
 	locals.MicroserviceKubernetes = stackInput.Target
@@ -38,11 +37,11 @@ func initializeLocals(ctx *pulumi.Context, stackInput *microservicekubernetes.Mi
 		kuberneteslabelkeys.Organization: stackInput.Target.Spec.EnvironmentInfo.OrgId,
 		kuberneteslabelkeys.Resource:     strconv.FormatBool(true),
 		kuberneteslabelkeys.ResourceId:   stackInput.Target.Metadata.Id,
-		kuberneteslabelkeys.ResourceKind: apiresourcekind.ApiResourceKind_microservice_kubernetes.String(),
+		kuberneteslabelkeys.ResourceKind: "microservice_kubernetes",
 	}
 
 	if stackInput.DockerCredential != nil &&
-		dockercredential.DockerRepoProvider_gcp_artifact_registry == stackInput.DockerCredential.DockerRepoProvider {
+		dockercredentialv1.DockerRepoProvider_gcp_artifact_registry == stackInput.DockerCredential.DockerRepoProvider {
 		decodedStringBytes, err := b64.StdEncoding.DecodeString(stackInput.DockerCredential.GcpArtifactRegistry.GcpServiceAccountKeyBase64)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to decode gcp service account key base64")

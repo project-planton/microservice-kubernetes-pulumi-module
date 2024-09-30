@@ -3,7 +3,6 @@ package pkg
 import (
 	"fmt"
 	"github.com/pkg/errors"
-	"github.com/plantoncloud/project-planton/apis/zzgo/cloud/planton/apis/commons/english/enums/englishword"
 	"github.com/plantoncloud/pulumi-module-golang-commons/pkg/datatypes/stringmaps/sortstringmap"
 	appsv1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/apps/v1"
 	kubernetescorev1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/core/v1"
@@ -101,12 +100,12 @@ func deployment(ctx *pulumi.Context, locals *Locals,
 			Ports: portsArray,
 			Resources: kubernetescorev1.ResourceRequirementsArgs{
 				Limits: pulumi.ToStringMap(map[string]string{
-					englishword.EnglishWord_cpu.String():    locals.MicroserviceKubernetes.Spec.Container.App.Resources.Limits.Cpu,
-					englishword.EnglishWord_memory.String(): locals.MicroserviceKubernetes.Spec.Container.App.Resources.Limits.Memory,
+					"cpu":    locals.MicroserviceKubernetes.Spec.Container.App.Resources.Limits.Cpu,
+					"memory": locals.MicroserviceKubernetes.Spec.Container.App.Resources.Limits.Memory,
 				}),
 				Requests: pulumi.ToStringMap(map[string]string{
-					englishword.EnglishWord_cpu.String():    locals.MicroserviceKubernetes.Spec.Container.App.Resources.Requests.Cpu,
-					englishword.EnglishWord_memory.String(): locals.MicroserviceKubernetes.Spec.Container.App.Resources.Requests.Memory,
+					"cpu":    locals.MicroserviceKubernetes.Spec.Container.App.Resources.Requests.Cpu,
+					"memory": locals.MicroserviceKubernetes.Spec.Container.App.Resources.Requests.Memory,
 				}),
 			},
 			Lifecycle: kubernetescorev1.LifecycleArgs{
