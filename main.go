@@ -1,7 +1,7 @@
 package main
 
 import (
-	microservicekubernetesv1 "buf.build/gen/go/plantoncloud/project-planton/protocolbuffers/go/project/planton/apis/provider/kubernetes/microservicekubernetes/v1"
+	microservicekubernetesv1 "buf.build/gen/go/plantoncloud/project-planton/protocolbuffers/go/project/planton/provider/kubernetes/microservicekubernetes/v1"
 	"github.com/pkg/errors"
 	"github.com/plantoncloud/microservice-kubernetes-pulumi-module/pkg"
 	"github.com/plantoncloud/pulumi-module-golang-commons/pkg/stackinput"

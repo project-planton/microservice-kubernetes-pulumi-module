@@ -1,8 +1,8 @@
 package pkg
 
 import (
-	dockercredentialv1 "buf.build/gen/go/plantoncloud/project-planton/protocolbuffers/go/project/planton/apis/credential/dockercredential/v1"
-	microservicekubernetesv1 "buf.build/gen/go/plantoncloud/project-planton/protocolbuffers/go/project/planton/apis/provider/kubernetes/microservicekubernetes/v1"
+	dockercredentialv1 "buf.build/gen/go/plantoncloud/project-planton/protocolbuffers/go/project/planton/credential/dockercredential/v1"
+	microservicekubernetesv1 "buf.build/gen/go/plantoncloud/project-planton/protocolbuffers/go/project/planton/provider/kubernetes/microservicekubernetes/v1"
 	b64 "encoding/base64"
 	"fmt"
 	"github.com/pkg/errors"
