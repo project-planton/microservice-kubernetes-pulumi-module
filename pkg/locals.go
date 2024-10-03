@@ -29,15 +29,26 @@ type Locals struct {
 
 func initializeLocals(ctx *pulumi.Context, stackInput *microservicekubernetesv1.MicroserviceKubernetesStackInput) (*Locals, error) {
 	locals := &Locals{}
+
+	//if the id is empty, use name as id
+	if stackInput.Target.Metadata.Id == "" {
+		stackInput.Target.Metadata.Id = stackInput.Target.Metadata.Name
+	}
+
+	microserviceKubernetes := stackInput.Target
+
 	//assign value for the locals variable to make it available across the project
 	locals.MicroserviceKubernetes = stackInput.Target
 
 	locals.Labels = map[string]string{
-		kuberneteslabelkeys.Environment:  stackInput.Target.Spec.EnvironmentInfo.EnvId,
-		kuberneteslabelkeys.Organization: stackInput.Target.Spec.EnvironmentInfo.OrgId,
 		kuberneteslabelkeys.Resource:     strconv.FormatBool(true),
 		kuberneteslabelkeys.ResourceId:   stackInput.Target.Metadata.Id,
 		kuberneteslabelkeys.ResourceKind: "microservice_kubernetes",
+	}
+
+	if microserviceKubernetes.Spec.EnvironmentInfo != nil {
+		locals.Labels[kuberneteslabelkeys.Environment] = microserviceKubernetes.Spec.EnvironmentInfo.EnvId
+		locals.Labels[kuberneteslabelkeys.Organization] = microserviceKubernetes.Spec.EnvironmentInfo.OrgId
 	}
 
 	if stackInput.DockerCredential != nil &&
@@ -60,10 +71,9 @@ func initializeLocals(ctx *pulumi.Context, stackInput *microservicekubernetesv1.
 			}`, stackInput.DockerCredential.GcpArtifactRegistry.DockerRepoHostname, dockerConfigAuth)}
 	}
 
-	microserviceKubernetes := stackInput.Target
-
 	//decide on the namespace
 	locals.Namespace = microserviceKubernetes.Metadata.Id
+
 	ctx.Export(outputs.Namespace, pulumi.String(locals.Namespace))
 
 	locals.KubeServiceName = microserviceKubernetes.Spec.Version
