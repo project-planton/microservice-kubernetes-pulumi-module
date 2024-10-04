@@ -13,20 +13,6 @@ import (
 func deployment(ctx *pulumi.Context, locals *Locals,
 	createdNamespace *kubernetescorev1.Namespace) (*appsv1.Deployment, error) {
 
-	// create image pull secret resources
-	_, err := kubernetescorev1.NewSecret(ctx, locals.MicroserviceKubernetes.Spec.DockerCredentialId, &kubernetescorev1.SecretArgs{
-		Metadata: &metav1.ObjectMetaArgs{
-			Name:      pulumi.String(locals.MicroserviceKubernetes.Spec.DockerCredentialId),
-			Namespace: createdNamespace.Metadata.Name(),
-			Labels:    pulumi.ToStringMap(locals.Labels),
-		},
-		Type:       pulumi.String("kubernetes.io/dockerconfigjson"),
-		StringData: pulumi.ToStringMap(locals.ImagePullSecretData),
-	}, pulumi.Parent(createdNamespace))
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to add image pull secret")
-	}
-
 	// create service account
 	createdServiceAccount, err := kubernetescorev1.NewServiceAccount(ctx, locals.MicroserviceKubernetes.Metadata.Id, &kubernetescorev1.ServiceAccountArgs{
 		Metadata: metav1.ObjectMetaPtrInput(&metav1.ObjectMetaArgs{
@@ -119,6 +105,35 @@ func deployment(ctx *pulumi.Context, locals *Locals,
 			},
 		}))
 
+	podSpecArgs := &kubernetescorev1.PodSpecArgs{
+		ServiceAccountName: createdServiceAccount.Metadata.Name(),
+		Containers:         kubernetescorev1.ContainerArray(containerInputs),
+		//wait for 60 seconds before sending the termination signal to the processes in the pod
+		TerminationGracePeriodSeconds: pulumi.IntPtr(60),
+	}
+
+	if locals.ImagePullSecretData != nil {
+		// create image pull secret resources
+		createdImagePullSecret, err := kubernetescorev1.NewSecret(ctx,
+			locals.MicroserviceKubernetes.Spec.DockerCredentialId,
+			&kubernetescorev1.SecretArgs{
+				Metadata: &metav1.ObjectMetaArgs{
+					Name:      pulumi.String(locals.MicroserviceKubernetes.Spec.DockerCredentialId),
+					Namespace: createdNamespace.Metadata.Name(),
+					Labels:    pulumi.ToStringMap(locals.Labels),
+				},
+				Type:       pulumi.String("kubernetes.io/dockerconfigjson"),
+				StringData: pulumi.ToStringMap(locals.ImagePullSecretData),
+			}, pulumi.Parent(createdNamespace))
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to add image pull secret")
+		}
+		podSpecArgs.ImagePullSecrets = kubernetescorev1.LocalObjectReferenceArray{
+			kubernetescorev1.LocalObjectReferenceArgs{
+				Name: createdImagePullSecret.Metadata.Name(),
+			}}
+	}
+
 	//create deployment
 	createdDeployment, err := appsv1.NewDeployment(ctx,
 		locals.MicroserviceKubernetes.Spec.Version,
@@ -140,15 +155,7 @@ func deployment(ctx *pulumi.Context, locals *Locals,
 					Metadata: &metav1.ObjectMetaArgs{
 						Labels: pulumi.ToStringMap(locals.Labels),
 					},
-					Spec: &kubernetescorev1.PodSpecArgs{
-						ServiceAccountName: createdServiceAccount.Metadata.Name(),
-						ImagePullSecrets: kubernetescorev1.LocalObjectReferenceArray{kubernetescorev1.LocalObjectReferenceArgs{
-							Name: pulumi.String(locals.MicroserviceKubernetes.Spec.DockerCredentialId),
-						}},
-						Containers: kubernetescorev1.ContainerArray(containerInputs),
-						//wait for 60 seconds before sending the termination signal to the processes in the pod
-						TerminationGracePeriodSeconds: pulumi.IntPtr(60),
-					},
+					Spec: podSpecArgs,
 				},
 			},
 		}, pulumi.Parent(createdNamespace), pulumi.IgnoreChanges([]string{
