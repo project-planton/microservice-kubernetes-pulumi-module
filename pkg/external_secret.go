@@ -12,6 +12,11 @@ import (
 
 func externalSecret(ctx *pulumi.Context, locals *Locals,
 	createdNamespace *kubernetescorev1.Namespace) error {
+
+	if locals.MicroserviceKubernetes.Spec.Container.App.Env == nil {
+		return nil
+	}
+
 	var secrets = locals.MicroserviceKubernetes.Spec.Container.App.Env.Secrets
 	if secrets == nil || len(secrets) == 0 {
 		return nil
