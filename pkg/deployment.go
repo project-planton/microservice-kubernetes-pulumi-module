@@ -14,12 +14,14 @@ func deployment(ctx *pulumi.Context, locals *Locals,
 	createdNamespace *kubernetescorev1.Namespace) (*appsv1.Deployment, error) {
 
 	// create service account
-	createdServiceAccount, err := kubernetescorev1.NewServiceAccount(ctx, locals.MicroserviceKubernetes.Metadata.Id, &kubernetescorev1.ServiceAccountArgs{
-		Metadata: metav1.ObjectMetaPtrInput(&metav1.ObjectMetaArgs{
-			Name:      pulumi.String(locals.MicroserviceKubernetes.Metadata.Id),
-			Namespace: createdNamespace.Metadata.Name(),
-		}),
-	}, pulumi.Parent(createdNamespace))
+	createdServiceAccount, err := kubernetescorev1.NewServiceAccount(ctx,
+		locals.MicroserviceKubernetes.Metadata.Id,
+		&kubernetescorev1.ServiceAccountArgs{
+			Metadata: metav1.ObjectMetaPtrInput(&metav1.ObjectMetaArgs{
+				Name:      pulumi.String(locals.MicroserviceKubernetes.Metadata.Id),
+				Namespace: createdNamespace.Metadata.Name(),
+			}),
+		}, pulumi.Parent(createdNamespace))
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to add service account")
 	}
@@ -45,27 +47,33 @@ func deployment(ctx *pulumi.Context, locals *Locals,
 		},
 	}))
 
-	sortedEnvVariableKeys := sortstringmap.SortMap(locals.MicroserviceKubernetes.Spec.Container.App.Env.Variables)
+	if locals.MicroserviceKubernetes.Spec.Container.App.Env != nil {
+		if locals.MicroserviceKubernetes.Spec.Container.App.Env.Variables != nil {
+			sortedEnvVariableKeys := sortstringmap.SortMap(locals.MicroserviceKubernetes.Spec.Container.App.Env.Variables)
 
-	for _, environmentVariableKey := range sortedEnvVariableKeys {
-		envVarInputs = append(envVarInputs, kubernetescorev1.EnvVarInput(kubernetescorev1.EnvVarArgs{
-			Name:  pulumi.String(environmentVariableKey),
-			Value: pulumi.String(locals.MicroserviceKubernetes.Spec.Container.App.Env.Variables[environmentVariableKey]),
-		}))
-	}
+			for _, environmentVariableKey := range sortedEnvVariableKeys {
+				envVarInputs = append(envVarInputs, kubernetescorev1.EnvVarInput(kubernetescorev1.EnvVarArgs{
+					Name:  pulumi.String(environmentVariableKey),
+					Value: pulumi.String(locals.MicroserviceKubernetes.Spec.Container.App.Env.Variables[environmentVariableKey]),
+				}))
+			}
+		}
 
-	sortedEnvironmentSecretKeys := sortstringmap.SortMap(locals.MicroserviceKubernetes.Spec.Container.App.Env.Secrets)
+		if locals.MicroserviceKubernetes.Spec.Container.App.Env.Secrets != nil {
+			sortedEnvironmentSecretKeys := sortstringmap.SortMap(locals.MicroserviceKubernetes.Spec.Container.App.Env.Secrets)
 
-	for _, environmentSecretKey := range sortedEnvironmentSecretKeys {
-		envVarInputs = append(envVarInputs, kubernetescorev1.EnvVarInput(kubernetescorev1.EnvVarArgs{
-			Name: pulumi.String(environmentSecretKey),
-			ValueFrom: &kubernetescorev1.EnvVarSourceArgs{
-				SecretKeyRef: &kubernetescorev1.SecretKeySelectorArgs{
-					Name: pulumi.String(locals.MicroserviceKubernetes.Spec.Version),
-					Key:  pulumi.String(environmentSecretKey),
-				},
-			},
-		}))
+			for _, environmentSecretKey := range sortedEnvironmentSecretKeys {
+				envVarInputs = append(envVarInputs, kubernetescorev1.EnvVarInput(kubernetescorev1.EnvVarArgs{
+					Name: pulumi.String(environmentSecretKey),
+					ValueFrom: &kubernetescorev1.EnvVarSourceArgs{
+						SecretKeyRef: &kubernetescorev1.SecretKeySelectorArgs{
+							Name: pulumi.String(locals.MicroserviceKubernetes.Spec.Version),
+							Key:  pulumi.String(environmentSecretKey),
+						},
+					},
+				}))
+			}
+		}
 	}
 
 	portsArray := make(kubernetescorev1.ContainerPortArray, 0)
@@ -80,8 +88,10 @@ func deployment(ctx *pulumi.Context, locals *Locals,
 	//add main container
 	containerInputs = append(containerInputs, kubernetescorev1.ContainerInput(
 		&kubernetescorev1.ContainerArgs{
-			Name:  pulumi.String("microservice"),
-			Image: pulumi.String(fmt.Sprintf("%s:%s", locals.MicroserviceKubernetes.Spec.Container.App.Image.Repo, locals.MicroserviceKubernetes.Spec.Container.App.Image.Tag)),
+			Name: pulumi.String("microservice"),
+			Image: pulumi.String(fmt.Sprintf("%s:%s",
+				locals.MicroserviceKubernetes.Spec.Container.App.Image.Repo,
+				locals.MicroserviceKubernetes.Spec.Container.App.Image.Tag)),
 			Env:   kubernetescorev1.EnvVarArray(envVarInputs),
 			Ports: portsArray,
 			Resources: kubernetescorev1.ResourceRequirementsArgs{
@@ -98,7 +108,6 @@ func deployment(ctx *pulumi.Context, locals *Locals,
 				PreStop: kubernetescorev1.LifecycleHandlerArgs{
 					Exec: kubernetescorev1.ExecActionArgs{
 						//wait for 60 seconds before killing the main process
-						//this is particularly useful and required when deploying build and stack microservices of planton cloud service in production.
 						Command: pulumi.ToStringArray([]string{"/bin/sleep", "60"}),
 					},
 				},
