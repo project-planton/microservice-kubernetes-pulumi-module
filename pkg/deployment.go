@@ -124,10 +124,10 @@ func deployment(ctx *pulumi.Context, locals *Locals,
 	if locals.ImagePullSecretData != nil {
 		// create image pull secret resources
 		createdImagePullSecret, err := kubernetescorev1.NewSecret(ctx,
-			locals.MicroserviceKubernetes.Spec.DockerCredentialId,
+			"image-pull-secret",
 			&kubernetescorev1.SecretArgs{
 				Metadata: &metav1.ObjectMetaArgs{
-					Name:      pulumi.String(locals.MicroserviceKubernetes.Spec.DockerCredentialId),
+					Name:      pulumi.String("image-pull-secret"),
 					Namespace: createdNamespace.Metadata.Name(),
 					Labels:    pulumi.ToStringMap(locals.Labels),
 				},
