@@ -2,8 +2,8 @@ package pkg
 
 import (
 	"github.com/pkg/errors"
-	certmanagerv1 "github.com/plantoncloud/kubernetes-crd-pulumi-types/pkg/certmanager/certmanager/v1"
-	gatewayv1 "github.com/plantoncloud/kubernetes-crd-pulumi-types/pkg/gatewayapis/gateway/v1"
+	certmanagerv1 "github.com/project-planton/kubernetes-crd-pulumi-types/pkg/certmanager/kubernetes/cert_manager/v1"
+	gatewayv1 "github.com/project-planton/kubernetes-crd-pulumi-types/pkg/gatewayapis/kubernetes/gateway/v1"
 	"github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes"
 	kubernetescorev1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/core/v1"
 	metav1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/meta/v1"
@@ -46,10 +46,10 @@ func ingress(ctx *pulumi.Context, locals *Locals, kubernetesProvider *kubernetes
 			},
 			Spec: gatewayv1.GatewaySpecArgs{
 				GatewayClassName: pulumi.String(vars.GatewayIngressClassName),
-				Addresses: pulumi.Array{
-					pulumi.Map{
-						"type":  pulumi.String("Hostname"),
-						"value": pulumi.String(vars.GatewayExternalLoadBalancerServiceHostname),
+				Addresses: gatewayv1.GatewaySpecAddressesArray{
+					gatewayv1.GatewaySpecAddressesArgs{
+						Type:  pulumi.String("Hostname"),
+						Value: pulumi.String(vars.GatewayExternalLoadBalancerServiceHostname),
 					},
 				},
 				Listeners: gatewayv1.GatewaySpecListenersArray{
@@ -102,10 +102,10 @@ func ingress(ctx *pulumi.Context, locals *Locals, kubernetesProvider *kubernetes
 			},
 			Spec: gatewayv1.GatewaySpecArgs{
 				GatewayClassName: pulumi.String(vars.GatewayIngressClassName),
-				Addresses: pulumi.Array{
-					pulumi.Map{
-						"type":  pulumi.String("Hostname"),
-						"value": pulumi.String(vars.GatewayInternalLoadBalancerServiceHostname),
+				Addresses: gatewayv1.GatewaySpecAddressesArray{
+					gatewayv1.GatewaySpecAddressesArgs{
+						Type:  pulumi.String("Hostname"),
+						Value: pulumi.String(vars.GatewayInternalLoadBalancerServiceHostname),
 					},
 				},
 				Listeners: gatewayv1.GatewaySpecListenersArray{

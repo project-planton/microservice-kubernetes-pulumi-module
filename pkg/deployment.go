@@ -3,7 +3,7 @@ package pkg
 import (
 	"fmt"
 	"github.com/pkg/errors"
-	"github.com/plantoncloud/pulumi-module-golang-commons/pkg/datatypes/stringmaps/sortstringmap"
+	"github.com/project-planton/pulumi-module-golang-commons/pkg/datatypes/stringmaps/sortstringmap"
 	appsv1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/apps/v1"
 	kubernetescorev1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/core/v1"
 	metav1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/meta/v1"
