@@ -1,13 +1,13 @@
 package pkg
 
 import (
-	dockercredentialv1 "buf.build/gen/go/project-planton/apis/protocolbuffers/go/project/planton/credential/dockercredential/v1"
-	microservicekubernetesv1 "buf.build/gen/go/project-planton/apis/protocolbuffers/go/project/planton/provider/kubernetes/microservicekubernetes/v1"
 	b64 "encoding/base64"
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/project-planton/microservice-kubernetes-pulumi-module/pkg/outputs"
-	"github.com/project-planton/pulumi-module-golang-commons/pkg/provider/kubernetes/kuberneteslabelkeys"
+	dockercredentialv1 "github.com/project-planton/project-planton/apis/go/project/planton/credential/dockercredential/v1"
+	microservicekubernetesv1 "github.com/project-planton/project-planton/apis/go/project/planton/provider/kubernetes/microservicekubernetes/v1"
+	"github.com/project-planton/project-planton/pkg/pulmod/provider/kubernetes/kuberneteslabelkeys"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"strconv"
 )

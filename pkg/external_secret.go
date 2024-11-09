@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	externalsecretsv1beta1 "github.com/project-planton/kubernetes-crd-pulumi-types/pkg/externalsecrets/kubernetes/external_secrets/v1beta1"
-	"github.com/project-planton/pulumi-module-golang-commons/pkg/datatypes/stringmaps/sortstringmap"
+	"github.com/project-planton/project-planton/pkg/pulmod/datatypes/stringmaps/sortstringmap"
 	kubernetescorev1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/core/v1"
 	metav1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/meta/v1"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
