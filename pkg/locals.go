@@ -55,14 +55,17 @@ func initializeLocals(ctx *pulumi.Context, stackInput *microservicekubernetesv1.
 	}
 
 	if stackInput.DockerCredential != nil &&
-		dockercredentialv1.DockerRepoProvider_gcp_artifact_registry == stackInput.DockerCredential.DockerRepoProvider {
-		decodedStringBytes, err := b64.StdEncoding.DecodeString(stackInput.DockerCredential.GcpArtifactRegistry.GcpServiceAccountKeyBase64)
+		dockercredentialv1.DockerRepoProvider_gcp_artifact_registry == stackInput.DockerCredential.Provider {
+		decodedStringBytes, err := b64.StdEncoding.DecodeString(stackInput.DockerCredential.GcpArtifactRegistry.ServiceAccountKeyBase64)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to decode gcp service account key base64")
 		}
 		dockerConfigAuth := fmt.Sprintf("_json_key:%s", string(decodedStringBytes))
 
 		dockerConfigAuth = b64.StdEncoding.EncodeToString([]byte(dockerConfigAuth))
+
+		dockerRepoHostname := fmt.Sprintf("%s-docker.pkg.dev", stackInput.DockerCredential.GcpArtifactRegistry.GcpRegion)
+
 		locals.ImagePullSecretData = map[string]string{".dockerconfigjson": fmt.Sprintf(`
 			{
   				"auths": {
@@ -71,7 +74,7 @@ func initializeLocals(ctx *pulumi.Context, stackInput *microservicekubernetesv1.
 						"auth": "%s"
 					}
   				}
-			}`, stackInput.DockerCredential.GcpArtifactRegistry.DockerRepoHostname, dockerConfigAuth)}
+			}`, dockerRepoHostname, dockerConfigAuth)}
 	}
 
 	//decide on the namespace
@@ -97,15 +100,15 @@ func initializeLocals(ctx *pulumi.Context, stackInput *microservicekubernetesv1.
 
 	if microserviceKubernetes.Spec.Ingress == nil ||
 		!microserviceKubernetes.Spec.Ingress.IsEnabled ||
-		microserviceKubernetes.Spec.Ingress.EndpointDomainName == "" {
+		microserviceKubernetes.Spec.Ingress.DnsDomain == "" {
 		return locals, nil
 	}
 
 	locals.IngressExternalHostname = fmt.Sprintf("%s.%s", microserviceKubernetes.Metadata.Id,
-		microserviceKubernetes.Spec.Ingress.EndpointDomainName)
+		microserviceKubernetes.Spec.Ingress.DnsDomain)
 
 	locals.IngressInternalHostname = fmt.Sprintf("%s-internal.%s", microserviceKubernetes.Metadata.Id,
-		microserviceKubernetes.Spec.Ingress.EndpointDomainName)
+		microserviceKubernetes.Spec.Ingress.DnsDomain)
 
 	locals.IngressHostnames = []string{
 		locals.IngressExternalHostname,
@@ -121,7 +124,7 @@ func initializeLocals(ctx *pulumi.Context, stackInput *microservicekubernetesv1.
 	//if the kubernetes-cluster is created using Planton Cloud, then the cluster-issuer name will be
 	//same as the ingress-domain-name as long as the same ingress-domain-name is added to the list of
 	//ingress-domain-names for the GkeCluster/EksCluster/AksCluster spec.
-	locals.IngressCertClusterIssuerName = microserviceKubernetes.Spec.Ingress.EndpointDomainName
+	locals.IngressCertClusterIssuerName = microserviceKubernetes.Spec.Ingress.DnsDomain
 
 	locals.IngressCertSecretName = microserviceKubernetes.Metadata.Id
 
